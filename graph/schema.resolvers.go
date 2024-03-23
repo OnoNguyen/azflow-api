@@ -9,6 +9,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/gofiber/fiber/v2/log"
 	"math/big"
 )
 
@@ -16,11 +17,14 @@ import (
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
 	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
 	todo := &model.Todo{
-		Text: input.Text,
-		ID:   fmt.Sprintf("T%d", randNumber),
-		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
+		Text:   input.Text,
+		ID:     fmt.Sprintf("T%d", randNumber),
+		UserID: input.UserID,
 	}
 	r.todos = append(r.todos, todo)
+
+	log.Info("Todo created: ", todo.ID, " ", todo.Text, " ", todo.UserID)
+
 	return todo, nil
 }
 
@@ -31,7 +35,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 
 // User is the resolver for the user field.
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	return &model.User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
 }
 
 // Mutation returns MutationResolver implementation.
