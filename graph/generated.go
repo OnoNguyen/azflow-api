@@ -70,13 +70,13 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error)
+	CreateTodo(ctx context.Context, input model.NewTodo) (*Todo, error)
 }
 type QueryResolver interface {
-	Todos(ctx context.Context) ([]*model.Todo, error)
+	Todos(ctx context.Context) ([]*Todo, error)
 }
 type TodoResolver interface {
-	User(ctx context.Context, obj *model.Todo) (*model.User, error)
+	User(ctx context.Context, obj *Todo) (*model.User, error)
 }
 
 type executableSchema struct {
@@ -378,7 +378,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Todo)
+	res := resTmp.(*Todo)
 	fc.Result = res
 	return ec.marshalNTodo2ᚖazflowᚑapiᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
@@ -443,7 +443,7 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Todo)
+	res := resTmp.([]*Todo)
 	fc.Result = res
 	return ec.marshalNTodo2ᚕᚖazflowᚑapiᚋgraphᚋmodelᚐTodoᚄ(ctx, field.Selections, res)
 }
@@ -600,7 +600,7 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -644,7 +644,7 @@ func (ec *executionContext) fieldContext_Todo_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_text(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -688,7 +688,7 @@ func (ec *executionContext) fieldContext_Todo_text(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_done(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -732,7 +732,7 @@ func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_user(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2808,7 +2808,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var todoImplementors = []string{"Todo"}
 
-func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *model.Todo) graphql.Marshaler {
+func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *Todo) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, todoImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3311,11 +3311,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTodo2azflowᚑapiᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2azflowᚑapiᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v Todo) graphql.Marshaler {
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖazflowᚑapiᚋgraphᚋmodelᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕᚖazflowᚑapiᚋgraphᚋmodelᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3359,7 +3359,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖazflowᚑapiᚋgraphᚋmodelᚐTo
 	return ret
 }
 
-func (ec *executionContext) marshalNTodo2ᚖazflowᚑapiᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚖazflowᚑapiᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *Todo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

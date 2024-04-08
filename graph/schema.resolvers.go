@@ -14,9 +14,9 @@ import (
 )
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*Todo, error) {
 	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
-	todo := &model.Todo{
+	todo := &Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", randNumber),
 		UserID: input.UserID,
@@ -29,12 +29,12 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 // Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
 	return r.todos, nil
 }
 
 // User is the resolver for the user field.
-func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
+func (r *todoResolver) User(ctx context.Context, obj *Todo) (*model.User, error) {
 	return &model.User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
 }
 

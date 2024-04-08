@@ -1,28 +1,17 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
+package graph
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+type Todo struct {
+	ID     string `json:"id"`
+	Text   string `json:"text"`
+	Done   bool   `json:"done"`
+	UserID string `json:"userId"`
+	User   *User  `json:"user"`
 }
 
-type User {
-  id: ID!
-  name: String!
-}
-
-type Query {
-  todos: [Todo!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
+type User struct {
+	ID       string  `json:"id"`
+	UserName string  `json:"name"`
+	Email    string  `json:"email"`
+	Avatar   string  `json:"avatar"`
+	Notes    []*Note `json:"notes"`
 }

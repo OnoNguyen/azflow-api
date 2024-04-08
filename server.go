@@ -2,21 +2,24 @@ package main
 
 import (
 	"azflow-api/graph"
+	"azflow-api/handlers"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 const defaultPort = "8080"
 
 func main() {
+	password := "password"
+	handlers.HashPassord(password)
+
 	router := chi.NewRouter()
 
 	c := cors.New(cors.Options{
