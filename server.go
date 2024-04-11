@@ -3,6 +3,7 @@ package main
 import (
 	"azflow-api/graph"
 	"azflow-api/handlers"
+	database "azflow-api/internal/pkg/db/mysql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -21,6 +22,15 @@ func main() {
 	handlers.HashPassord(password)
 
 	router := chi.NewRouter()
+
+	database.InitDB()
+	defer func() {
+		err := database.CloseDB()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	database.Migrate()
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
