@@ -2,7 +2,7 @@ package main
 
 import (
 	"azflow-api/graph"
-	"azflow-api/handlers"
+	"azflow-api/internal/auth"
 	database "azflow-api/internal/pkg/db/mysql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -18,10 +18,19 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	password := "password"
-	handlers.HashPassord(password)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
 
 	router := chi.NewRouter()
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            true})
+
+	router.Use(c.Handler, auth.Middleware())
 
 	database.InitDB()
 	defer func() {
@@ -31,18 +40,6 @@ func main() {
 		}
 	}()
 	database.Migrate()
-
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		Debug:            true})
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
-
-	router.Use(c.Handler)
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(&transport.Websocket{

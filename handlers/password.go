@@ -1,28 +1,21 @@
 package handlers
 
 import (
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 )
 
-func HashPassord(password string) {
+func HashPassord(password string) (string, error) {
 	pass := []byte(password)
 
 	hash, err := bcrypt.GenerateFromPassword(pass, bcrypt.DefaultCost)
-	if err != nil {
-		log.Println(err)
-	}
 
-	fmt.Println(string(hash))
+	return string(hash), err
 }
 
-func CheckPassword(password string, hash string) {
+func CheckPasswordHash(password string, hash string) bool {
 	pass := []byte(password)
 	has := []byte(hash)
 
 	err := bcrypt.CompareHashAndPassword(has, pass)
-	if err != nil {
-		log.Println(err)
-	}
+	return err == nil
 }
