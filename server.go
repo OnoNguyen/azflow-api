@@ -3,7 +3,8 @@ package main
 import (
 	"azflow-api/graph"
 	"azflow-api/internal/auth"
-	database "azflow-api/internal/pkg/db/mysql"
+	//database "azflow-api/internal/pkg/db/mysql"
+	database "azflow-api/internal/pkg/db/postgresql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
