@@ -1,7 +1,8 @@
 package links
 
 import (
-	database "azflow-api/internal/pkg/db/mysql"
+	//database "azflow-api/internal/pkg/db/mysql"
+	database "azflow-api/internal/pkg/db/postgresql"
 	"azflow-api/internal/users"
 	"log"
 )
@@ -43,20 +44,23 @@ func GetAll() []Link {
 }
 
 func (link Link) Save() int64 {
-	stmt, err := database.Db.Prepare("INSERT INTO Links(Title, Address, UserID) VALUES (?, ?, ?)")
+	stmt, err := database.Db.Prepare("INSERT INTO Links(Title, Address, UserID) VALUES ($1, $2, $3) RETURNING ID")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	res, err := stmt.Exec(link.Title, link.Address, link.User.ID)
+	defer stmt.Close()
+
+	var linkID int64
+
+	err = stmt.QueryRow(link.Title, link.Address, link.User.ID).Scan(&linkID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	id, err := res.LastInsertId()
 	if err != nil {
 		log.Fatal("Error:", err.Error())
 	}
 	log.Print("Row inserted")
-	return id
+	return linkID
 }

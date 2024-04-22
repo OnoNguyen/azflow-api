@@ -2,7 +2,8 @@ package users
 
 import (
 	"azflow-api/handlers"
-	database "azflow-api/internal/pkg/db/mysql"
+	//database "azflow-api/internal/pkg/db/mysql"
+	database "azflow-api/internal/pkg/db/postgresql"
 	"database/sql"
 	"log"
 )
@@ -14,7 +15,7 @@ type User struct {
 }
 
 func (user *User) Authenticate() bool {
-	stmt, err := database.Db.Prepare("select Password from Users where Username = ?")
+	stmt, err := database.Db.Prepare("select Password from Users where Username = $1")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +34,7 @@ func (user *User) Authenticate() bool {
 }
 
 func (user *User) Create() {
-	stmt, err := database.Db.Prepare("INSERT INTO Users(Username, Password) VALUES (?, ?)")
+	stmt, err := database.Db.Prepare("INSERT INTO Users(Username, Password) VALUES ($1, $2)")
 	print(stmt)
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +47,7 @@ func (user *User) Create() {
 }
 
 func GetUserIdByUsername(username string) (int, error) {
-	stmt, err := database.Db.Prepare("SELECT ID FROM Users WHERE Username = ?")
+	stmt, err := database.Db.Prepare("SELECT ID FROM Users WHERE Username = $1")
 	if err != nil {
 		log.Fatal(err)
 	}
