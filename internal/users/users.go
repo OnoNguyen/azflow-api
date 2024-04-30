@@ -65,3 +65,29 @@ func GetUserIdByUsername(username string) (int, error) {
 	}
 	return id, nil
 }
+
+func GetAll() []User {
+	stmt, err := database.Db.Prepare("select ID, Username from Users")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var users []User
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.ID, &user.Username)
+		if err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return users
+}

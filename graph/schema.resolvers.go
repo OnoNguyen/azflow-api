@@ -85,6 +85,17 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	return resultLinks, nil
 }
 
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	var resultUsers []*model.User
+	var dbUsers []users.User
+	dbUsers = users.GetAll()
+	for _, user := range dbUsers {
+		resultUsers = append(resultUsers, &model.User{ID: user.ID, Name: user.Username})
+	}
+	return resultUsers, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
