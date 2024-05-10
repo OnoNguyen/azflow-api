@@ -36,12 +36,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	var user users.User
 	user.Username = input.Username
 	user.Password = input.Password
-	user.Create()
-	token, err := jwt.GenerateToken(user.Username)
+	id, err := user.Create()
+	print("user created with id: ", *id)
 	if err != nil {
 		return "", err
 	}
-	return token, nil
+	token, err := jwt.GenerateToken(user.Username)
+	return token, err
 }
 
 // Login is the resolver for the login field.
@@ -49,15 +50,14 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 	var user users.User
 	user.Username = input.Username
 	user.Password = input.Password
-	correct := user.Authenticate()
-	if !correct {
-		return "", &users.WrongUsernameOrPasswordError{}
-	}
-	token, err := jwt.GenerateToken(user.Username)
+	correct, err := user.Authenticate()
 	if err != nil {
 		return "", err
 	}
-	return token, nil
+	if !correct {
+		return "", &users.WrongUsernameOrPasswordError{}
+	}
+	return jwt.GenerateToken(user.Username)
 }
 
 // RefreshToken is the resolver for the refreshToken field.
@@ -87,13 +87,15 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	var resultUsers []*model.User
-	var dbUsers []users.User
-	dbUsers = users.GetAll()
-	for _, user := range dbUsers {
-		resultUsers = append(resultUsers, &model.User{ID: user.ID, Name: user.Username})
+	var res []*model.User
+	usrs, err := users.GetAll()
+	if err != nil {
+		return nil, err
 	}
-	return resultUsers, nil
+	for _, u := range usrs {
+		res = append(res, &model.User{ID: u.ID, Name: u.Username})
+	}
+	return res, nil
 }
 
 // Mutation returns MutationResolver implementation.

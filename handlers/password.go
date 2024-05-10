@@ -2,14 +2,19 @@ package handlers
 
 import (
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
-func HashPassord(password string) (string, error) {
+func HashPassord(password string) string {
 	pass := []byte(password)
 
 	hash, err := bcrypt.GenerateFromPassword(pass, bcrypt.DefaultCost)
 
-	return string(hash), err
+	if err != nil {
+		log.Print(err)
+	}
+
+	return string(hash)
 }
 
 func CheckPasswordHash(password string, hash string) bool {

@@ -1,33 +1,34 @@
-package postgresql
+package database
 
 import (
-	"database/sql"
+	"context"
+	"errors"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jackc/pgx/v5"
 )
 
-var Db *sql.DB
+var Db *pgx.Conn
 
 func InitDB() {
 	connStr := "user=azflow-admin dbname=azflowcore password=abcd1234 host=localhost port=5432 sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {
 		panic(err)
 	}
-
-	if err = db.Ping(); err != nil {
+	if err := conn.Ping(context.Background()); err != nil {
 		panic(err)
 	}
-	Db = db
+	Db = conn
 }
 
 func CloseDB() error {
-	return Db.Close()
+	return Db.Close(context.Background())
 }
 
 func Migrate() {
-	if err := Db.Ping(); err != nil {
+	if err := Db.Ping(context.Background()); err != nil {
 		panic(err)
 	}
 
@@ -37,7 +38,23 @@ func Migrate() {
 		panic(err)
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		panic(err)
 	}
 }
+
+//
+//func RunQuery(cte string, args ...any) (*sql.Rows, error) {
+//	stmt, err := Db.Prepare(cte)
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer stmt.Close()
+//
+//	rows, err := stmt.Query(args...)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return rows, nil
+//}

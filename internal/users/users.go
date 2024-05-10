@@ -2,92 +2,33 @@ package users
 
 import (
 	"azflow-api/handlers"
+	"context"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	//database "azflow-api/internal/pkg/db/mysql"
 	database "azflow-api/internal/pkg/db/postgresql"
-	"database/sql"
-	"log"
 )
 
-type User struct {
-	ID       string `json:"id"`
-	Username string `json:"name"`
-	Password string `json:"password"`
-}
-
-func (user *User) Authenticate() bool {
-	stmt, err := database.Db.Prepare("select Password from Users where Username = $1")
-	if err != nil {
-		log.Fatal(err)
-	}
-	row := stmt.QueryRow(user.Username)
-
+func (user *User) Authenticate() (bool, error) {
 	var hashedPassword string
-	err = row.Scan(&hashedPassword)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return false
-		}
-		log.Fatal(err)
-	}
-
-	return handlers.CheckPasswordHash(user.Password, hashedPassword)
+	err := pgxscan.Get(context.Background(), database.Db, &hashedPassword, "SELECT Password FROM Users WHERE Username = $1", user.Username)
+	return handlers.CheckPasswordHash(user.Password, hashedPassword), err
 }
 
-func (user *User) Create() {
-	stmt, err := database.Db.Prepare("INSERT INTO Users(Username, Password) VALUES ($1, $2)")
-	print(stmt)
-	if err != nil {
-		log.Fatal(err)
-	}
-	hashedPassword, err := handlers.HashPassord(user.Password)
-	_, err = stmt.Exec(user.Username, hashedPassword)
-	if err != nil {
-		log.Fatal(err)
-	}
+func (user *User) Create() (*int, error) {
+	hashedPassword := handlers.HashPassord(user.Password)
+	var id *int
+	err := pgxscan.Get(context.Background(), database.Db, &id, "INSERT INTO Users(Username, Password) VALUES ($1, $2) returning ID", user.Username, hashedPassword)
+	return id, err
 }
 
 func GetUserIdByUsername(username string) (int, error) {
-	stmt, err := database.Db.Prepare("SELECT ID FROM Users WHERE Username = $1")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer stmt.Close()
-
-	row := stmt.QueryRow(username)
-	var id int
-	err = row.Scan(&id)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			log.Print(err)
-		}
-		return 0, err
-	}
-	return id, nil
+	var id *int
+	err := pgxscan.Get(context.Background(), database.Db, &id, "SELECT ID FROM Users WHERE Username = $1", username)
+	return *id, err
 }
 
-func GetAll() []User {
-	stmt, err := database.Db.Prepare("select ID, Username from Users")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-	rows, err := stmt.Query()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	var users []User
-	for rows.Next() {
-		var user User
-		err := rows.Scan(&user.ID, &user.Username)
-		if err != nil {
-			log.Fatal(err)
-		}
-		users = append(users, user)
-	}
-	if err = rows.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return users
+func GetAll() ([]*User, error) {
+	var users []*User
+	err := pgxscan.Select(context.Background(), database.Db, &users, "SELECT ID, Username FROM Users")
+	return users, err
 }
