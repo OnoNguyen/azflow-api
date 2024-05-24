@@ -3,6 +3,8 @@ package main
 import (
 	"azflow-api/graph"
 	"azflow-api/internal/auth"
+	"github.com/joho/godotenv"
+
 	//database "azflow-api/internal/pkg/db/mysql"
 	database "azflow-api/internal/pkg/db/postgresql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -19,6 +21,11 @@ import (
 const defaultPort = "8080"
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort

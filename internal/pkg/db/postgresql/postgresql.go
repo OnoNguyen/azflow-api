@@ -7,12 +7,13 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5"
+	"os"
 )
 
 var Db *pgx.Conn
 
 func InitDB() {
-	connStr := "user=azflow-admin dbname=azflowcore password=abcd1234 host=localhost port=5432 sslmode=disable"
+	connStr := os.Getenv("DATABASE_URL")
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {
 		panic(err)
