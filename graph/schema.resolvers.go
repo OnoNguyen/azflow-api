@@ -10,6 +10,7 @@ import (
 	"azflow-api/internal/links"
 	"azflow-api/internal/users"
 	"azflow-api/pkg/jwt"
+	"azflow-api/tts"
 	"context"
 	"fmt"
 	"strconv"
@@ -71,6 +72,11 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 		return "", err
 	}
 	return token, nil
+}
+
+// Tts is the resolver for the tts field.
+func (r *mutationResolver) Tts(ctx context.Context, input model.TTSInput) (string, error) {
+	return tts.Tts(input.Text, input.Voice)
 }
 
 // Links is the resolver for the links field.
