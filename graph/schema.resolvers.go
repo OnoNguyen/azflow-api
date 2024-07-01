@@ -76,7 +76,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 
 // Tts is the resolver for the tts field.
 func (r *mutationResolver) Tts(ctx context.Context, input model.TTSInput) (string, error) {
-	return tts.Tts(input.Text, input.Voice)
+	return tts.Tts(input.Text, input.Voice, input.UserID)
 }
 
 // Links is the resolver for the links field.
@@ -102,6 +102,11 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 		res = append(res, &model.User{ID: u.ID, Name: u.Username})
 	}
 	return res, nil
+}
+
+// TrackURL is the resolver for the trackUrl field.
+func (r *queryResolver) TrackURL(ctx context.Context) (string, error) {
+	return tts.GetTrack(), nil
 }
 
 // Mutation returns MutationResolver implementation.

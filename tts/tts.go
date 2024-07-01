@@ -1,6 +1,7 @@
 package tts
 
 import (
+	"azflow-api/azure"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -8,11 +9,17 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
-func Tts(input string, voice string) (string, error) {
+func GetTrack() string {
+	return "https://azflowresources.blob.core.windows.net/audio/speech.mp3?sp=r&st=2024-06-20T07:58:16Z&se=2024-06-20T15:58:16Z&spr=https&sv=2022-11-02&sr=b&sig=%2Fcp3XkF8N49KxseP0sSoDtD0oUHTtvmb5G4k5rz9ie0%3D"
+}
+
+// Tts takes a string input and a voice string and returns the path to the generated speech file.
+func Tts(input string, voice string, userId string) (string, error) {
 	if voice == "" {
-		return "Hello, World!", nil
+		voice = "onyx"
 	}
 
 	url := "https://api.openai.com/v1/audio/speech"
@@ -51,13 +58,19 @@ func Tts(input string, voice string) (string, error) {
 		os.Exit(1)
 	}
 
-	speechFilePath := filepath.Join("", "speech.mp3")
+	// Get the current timestamp
+	timestamp := time.Now().Format("20060102-150405")
+	// Create the file name with timestamp
+	fileName := fmt.Sprintf("%s.mp3", timestamp)
+
+	speechFilePath := filepath.Join("", fileName)
 	outFile, err := os.Create(speechFilePath)
 	if err != nil {
 		fmt.Println("Error creating file:", err)
 		os.Exit(1)
 	}
 	defer outFile.Close()
+	defer os.Remove(outFile.Name())
 
 	_, err = io.Copy(outFile, resp.Body)
 	if err != nil {
@@ -67,5 +80,6 @@ func Tts(input string, voice string) (string, error) {
 
 	fmt.Println("MP3 file successfully saved as", speechFilePath)
 
+	azure.UploadFile(userId, fileName, speechFilePath)
 	return speechFilePath, nil
 }

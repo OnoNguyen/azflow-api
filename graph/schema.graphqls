@@ -10,11 +10,6 @@ type User {
   name: String!
 }
 
-type Query {
-  links: [Link!]!
-  users: [User!]!
-}
-
 input NewLink {
   title: String!
   address: String!
@@ -37,6 +32,13 @@ input Login {
 input TTSInput {
   text: String!
   voice: String!
+  userId: String!
+}
+
+type Query {
+  links: [Link!]!
+  users: [User!]!
+  trackUrl: String!
 }
 
 type Mutation {
