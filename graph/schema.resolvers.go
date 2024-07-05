@@ -86,7 +86,12 @@ func (r *mutationResolver) TrackUrls(ctx context.Context, input model.TrackUrlsI
 	//	return nil, fmt.Errorf("access denied")
 	//}
 
-	return tts.GetTrackUrls(input.UserID)
+	urls, err := tts.GetTrackUrls(input.UserID)
+	if err != nil {
+		fmt.Println("Error getting track urls:", err)
+	}
+
+	return urls, err
 }
 
 // Links is the resolver for the links field.

@@ -47,8 +47,8 @@ func TestUploadFile(t *testing.T) {
 	}{
 		{
 			name:          "successful upload",
-			containerName: "test-2",
-			blobName:      "audio/testblob",
+			containerName: "audio",
+			blobName:      "1a0b3b6f-52c6-4039-afca-d7f93f9ff963/20240705-181528.mp3",
 			filePath:      tmpfile.Name(),
 			wantErr:       false,
 		},
@@ -77,9 +77,10 @@ func TestGetFileUrls(t *testing.T) {
 
 	// Mocked container name for testing
 	containerName := "audio"
+	path := "1a0b3b6f-52c6-4039-afca-d7f93f9ff963"
 
 	// Run the function under test
-	urls, err := GetFileUrls(containerName)
+	urls, err := GetFileUrls(containerName, path)
 
 	// Check for errors
 	if err != nil {
@@ -101,6 +102,5 @@ func TestGetFileUrls(t *testing.T) {
 		if parsedURL.Query().Get("se") == "" {
 			t.Error("Expected SAS token 'se' parameter, got empty")
 		}
-		// Additional checks can be added based on your requirements
 	}
 }

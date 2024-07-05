@@ -33,10 +33,10 @@ func Init() {
 }
 
 // UploadFile uploads a file to an Azure Blob Storage container
-// location: path to the subdirectory within containers (e.g. "audio/{userid}")
-func UploadFile(location, blobName, filePath string) error {
+// blobName: this can be the path to the blobName (e.g. "{userid}/{blobName}")
+func UploadFile(containerName, blobName, filePath string) error {
 	// Create a URL to the target container
-	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, location))
+	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, containerName))
 	if err != nil {
 		return fmt.Errorf("failed to parse container URL: %w", err)
 	}
@@ -83,7 +83,7 @@ func UploadFile(location, blobName, filePath string) error {
 // with a shared access signature (SAS)
 // for limited read access
 // and valid for one day.
-func GetFileUrls(containerName string) ([]string, error) {
+func GetFileUrls(containerName, path string) ([]string, error) {
 	// Create a URL to the target container
 	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, containerName))
 	if err != nil {
@@ -91,10 +91,12 @@ func GetFileUrls(containerName string) ([]string, error) {
 	}
 	containerURL := azblob.NewContainerURL(*URL, Pipeline)
 
-	// List blobs in the container
+	// List blobs in the container with the specified prefix
 	var blobURLs []string
 	for marker := (azblob.Marker{}); marker.NotDone(); {
-		listBlob, err := containerURL.ListBlobsFlatSegment(context.Background(), marker, azblob.ListBlobsSegmentOptions{})
+		listBlob, err := containerURL.ListBlobsFlatSegment(context.Background(), marker, azblob.ListBlobsSegmentOptions{
+			Prefix: path,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to list blobs: %v", err)
 		}

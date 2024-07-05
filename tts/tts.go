@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	AudioFolderName = "audio"
+	ContainerName = "audio"
 )
 
 func GetTrack() string {
@@ -21,7 +21,7 @@ func GetTrack() string {
 }
 
 func GetTrackUrls(userId string) ([]string, error) {
-	return azure.GetFileUrls(fmt.Sprintf("%s/%s", AudioFolderName, userId))
+	return azure.GetFileUrls(ContainerName, userId)
 }
 
 // Tts takes a string input and a voice string and returns the path to the generated speech file.
@@ -78,7 +78,7 @@ func Tts(input string, voice string, userId string) (string, error) {
 		os.Exit(1)
 	}
 	defer outFile.Close()
-	defer os.Remove(outFile.Name())
+	//defer os.Remove(outFile.Name())
 
 	_, err = io.Copy(outFile, resp.Body)
 	if err != nil {
@@ -88,7 +88,11 @@ func Tts(input string, voice string, userId string) (string, error) {
 
 	fmt.Println("MP3 file successfully saved as", speechFilePath)
 
-	err = azure.UploadFile(fmt.Sprintf("%s/%s", AudioFolderName, userId), fileName, speechFilePath)
+	filePath := fmt.Sprintf("%s/%s", userId, fileName)
+	fmt.Println("Uploading MP3 file to Azure Blob Storage...", filePath)
+
+	// TODO: create an orchestrator func to do tts, upload file, and return path
+	err = azure.UploadFile(ContainerName, filePath, speechFilePath)
 	if err != nil {
 		return "", err
 	}
