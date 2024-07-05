@@ -18,7 +18,6 @@ func initTest() {
 	}
 	Credential = credential
 	Pipeline = azblob.NewPipeline(Credential, azblob.PipelineOptions{})
-
 }
 
 func TestUploadFile(t *testing.T) {

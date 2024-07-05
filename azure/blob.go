@@ -33,9 +33,10 @@ func Init() {
 }
 
 // UploadFile uploads a file to an Azure Blob Storage container
-func UploadFile(containerName, blobName, filePath string) error {
+// location: path to the subdirectory within containers (e.g. "audio/{userid}")
+func UploadFile(location, blobName, filePath string) error {
 	// Create a URL to the target container
-	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, containerName))
+	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, location))
 	if err != nil {
 		return fmt.Errorf("failed to parse container URL: %w", err)
 	}
@@ -78,7 +79,10 @@ func UploadFile(containerName, blobName, filePath string) error {
 	return nil
 }
 
-// GetFileUrls gets URLs to all blobs in the specified container with a shared access signature (SAS) for limited read access for one day.
+// GetFileUrls gets URLs to all blobs in the specified container
+// with a shared access signature (SAS)
+// for limited read access
+// and valid for one day.
 func GetFileUrls(containerName string) ([]string, error) {
 	// Create a URL to the target container
 	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, containerName))

@@ -79,6 +79,16 @@ func (r *mutationResolver) Tts(ctx context.Context, input model.TTSInput) (strin
 	return tts.Tts(input.Text, input.Voice, input.UserID)
 }
 
+// TrackUrls is the resolver for the trackUrls field.
+func (r *mutationResolver) TrackUrls(ctx context.Context, input model.TrackUrlsInput) ([]string, error) {
+	//user := auth.ForContext(ctx)
+	//if user == nil {
+	//	return nil, fmt.Errorf("access denied")
+	//}
+
+	return tts.GetTrackUrls(input.UserID)
+}
+
 // Links is the resolver for the links field.
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	var resultLinks []*model.Link

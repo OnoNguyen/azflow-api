@@ -35,6 +35,10 @@ input TTSInput {
   userId: String!
 }
 
+input TrackUrlsInput {
+  userId: String!
+}
+
 type Query {
   links: [Link!]!
   users: [User!]!
@@ -48,4 +52,5 @@ type Mutation {
   # we'll talk about this in authentication section
   refreshToken(input: RefreshTokenInput!): String!
   tts(input: TTSInput!): String!
+  trackUrls(input: TrackUrlsInput!): [String!]!
 }
