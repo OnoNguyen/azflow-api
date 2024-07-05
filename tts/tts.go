@@ -16,8 +16,12 @@ func GetTrack() string {
 	return "https://azflowresources.blob.core.windows.net/audio/speech.mp3?sp=r&st=2024-06-20T07:58:16Z&se=2024-06-20T15:58:16Z&spr=https&sv=2022-11-02&sr=b&sig=%2Fcp3XkF8N49KxseP0sSoDtD0oUHTtvmb5G4k5rz9ie0%3D"
 }
 
+func GetTracks(userId string) string {
+	return azure.DownloadFile("tts", userId)
+}
+
 // Tts takes a string input and a voice string and returns the path to the generated speech file.
-func Tts(input string, voice string, userId string) (string, error) {
+func Tts(input string, voice TVoice, userId string) (string, error) {
 	if voice == "" {
 		voice = "onyx"
 	}

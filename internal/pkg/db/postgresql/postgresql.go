@@ -12,7 +12,7 @@ import (
 
 var Db *pgx.Conn
 
-func InitDB() {
+func Init() {
 	connStr := os.Getenv("DATABASE_URL")
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {
@@ -43,19 +43,3 @@ func Migrate() {
 		panic(err)
 	}
 }
-
-//
-//func RunQuery(cte string, args ...any) (*sql.Rows, error) {
-//	stmt, err := Db.Prepare(cte)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer stmt.Close()
-//
-//	rows, err := stmt.Query(args...)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return rows, nil
-//}

@@ -1,24 +1,28 @@
 package azure
 
 import (
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"testing"
 )
 
-// Mock the necessary Azure Blob Storage components
-//type MockBlobURL struct{}
-//
-//func (m *MockBlobURL) UploadBufferToBlockBlob(ctx context.Context, b []byte, o azblob.UploadToBlockBlobOptions) (*azblob.BlockBlobUploadResponse, error) {
-//	// Simulate a successful upload
-//	return &azblob.BlockBlobUploadResponse{}, nil
-//}
+func initTest() {
+	// Mocked values for testing
+	AccountName = "azflowresources"
+	AccountKey = "3SF5rYTQYdcHrXJpPEODMwGj/dfPWzI5Dimwr2KmHUVhxUVxm+NGY049xFMsT9e64wM3KwAXcKWl+AStp9BCXw=="
+	credential, err := azblob.NewSharedKeyCredential(AccountName, AccountKey)
+	if err != nil {
+		panic(err)
+	}
+	Credential = credential
+	Pipeline = azblob.NewPipeline(Credential, azblob.PipelineOptions{})
+
+}
 
 func TestUploadFile(t *testing.T) {
-	// Set up environment variables for testing
-	os.Setenv("AZURE_STORAGE_ACCOUNT", "azflowresources")
-	os.Setenv("AZURE_STORAGE_KEY", "3SF5rYTQYdcHrXJpPEODMwGj/dfPWzI5Dimwr2KmHUVhxUVxm+NGY049xFMsT9e64wM3KwAXcKWl+AStp9BCXw==")
-
+	initTest()
 	// Create a temporary file for testing
 	tmpfile, err := ioutil.TempFile("", "testfile")
 	if err != nil {
@@ -44,8 +48,8 @@ func TestUploadFile(t *testing.T) {
 	}{
 		{
 			name:          "successful upload",
-			containerName: "test-1",
-			blobName:      "testblob",
+			containerName: "test-2",
+			blobName:      "audio/testblob",
 			filePath:      tmpfile.Name(),
 			wantErr:       false,
 		},
@@ -66,5 +70,38 @@ func TestUploadFile(t *testing.T) {
 				t.Errorf("UploadFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestGetFileUrls(t *testing.T) {
+	initTest()
+
+	// Mocked container name for testing
+	containerName := "audio"
+
+	// Run the function under test
+	urls, err := GetFileUrls(containerName)
+
+	// Check for errors
+	if err != nil {
+		t.Fatalf("GetFileUrls failed: %v", err)
+	}
+
+	t.Log(urls)
+
+	// Verify each URL format
+	for _, u := range urls {
+		parsedURL, err := url.Parse(u)
+		if err != nil {
+			t.Errorf("Failed to parse URL %s: %v", u, err)
+			continue
+		}
+		if parsedURL.Scheme != "https" {
+			t.Errorf("Expected URL scheme to be 'https', got '%s'", parsedURL.Scheme)
+		}
+		if parsedURL.Query().Get("se") == "" {
+			t.Error("Expected SAS token 'se' parameter, got empty")
+		}
+		// Additional checks can be added based on your requirements
 	}
 }

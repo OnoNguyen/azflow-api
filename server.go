@@ -1,6 +1,7 @@
 package main
 
 import (
+	"azflow-api/azure"
 	"azflow-api/graph"
 	"azflow-api/internal/auth"
 	"github.com/joho/godotenv"
@@ -40,7 +41,7 @@ func main() {
 
 	router.Use(c.Handler, auth.Middleware())
 
-	database.InitDB()
+	database.Init()
 	defer func() {
 		err := database.CloseDB()
 		if err != nil {
@@ -48,6 +49,8 @@ func main() {
 		}
 	}()
 	database.Migrate()
+
+	azure.Init()
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(&transport.Websocket{
