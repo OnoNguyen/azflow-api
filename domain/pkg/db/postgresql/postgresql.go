@@ -34,7 +34,7 @@ func Migrate() {
 	}
 
 	driverURL := "postgres://postgres:abcd1234@localhost:5432/azflowcore?sslmode=disable"
-	m, err := migrate.New("file://internal/pkg/db/migrations/postgresql", driverURL)
+	m, err := migrate.New("file://domain/pkg/db/migrations/postgresql", driverURL)
 	if err != nil {
 		panic(err)
 	}

@@ -4,8 +4,8 @@ import (
 	"azflow-api/handlers"
 	"context"
 	"github.com/georgysavva/scany/v2/pgxscan"
-	//database "azflow-api/internal/pkg/db/mysql"
-	database "azflow-api/internal/pkg/db/postgresql"
+	//database "azflow-api/domain/pkg/db/mysql"
+	database "azflow-api/domain/pkg/db/postgresql"
 )
 
 func (user *User) Authenticate() (bool, error) {

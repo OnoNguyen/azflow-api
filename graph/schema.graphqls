@@ -29,13 +29,13 @@ input Login {
   password: String!
 }
 
-input TTSInput {
+input AudioInput {
   text: String!
   voice: String!
   userId: String!
 }
 
-input TrackUrlsInput {
+input AudioUrlsInput {
   userId: String!
 }
 
@@ -51,6 +51,6 @@ type Mutation {
   login(input: Login!): String!
   # we'll talk about this in authentication section
   refreshToken(input: RefreshTokenInput!): String!
-  tts(input: TTSInput!): String!
-  trackUrls(input: TrackUrlsInput!): [String!]!
+  createAudio(input: AudioInput!): String!
+  audioUrls(input: AudioUrlsInput!): [String!]!
 }

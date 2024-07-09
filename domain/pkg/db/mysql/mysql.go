@@ -33,7 +33,7 @@ func Migrate() {
 	}
 	driver, _ := mysql.WithInstance(Db, &mysql.Config{})
 	m, _ := migrate.NewWithDatabaseInstance(
-		"file://internal/pkg/db/migrations/mysql",
+		"file://domain/pkg/db/migrations/mysql",
 		"mysql",
 		driver,
 	)

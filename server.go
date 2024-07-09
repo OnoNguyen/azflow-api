@@ -2,12 +2,12 @@ package main
 
 import (
 	"azflow-api/azure"
+	"azflow-api/domain/auth"
 	"azflow-api/graph"
-	"azflow-api/internal/auth"
 	"github.com/joho/godotenv"
 
-	//database "azflow-api/internal/pkg/db/mysql"
-	database "azflow-api/internal/pkg/db/postgresql"
+	//database "azflow-api/domain/pkg/db/mysql"
+	database "azflow-api/domain/pkg/db/postgresql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"

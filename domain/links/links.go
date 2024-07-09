@@ -1,7 +1,7 @@
 package links
 
 import (
-	"azflow-api/internal/users"
+	"azflow-api/domain/users"
 )
 
 type Link struct {

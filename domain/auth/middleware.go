@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"azflow-api/internal/users"
+	"azflow-api/domain/users"
 	"azflow-api/pkg/jwt"
 	"context"
 	"net/http"
