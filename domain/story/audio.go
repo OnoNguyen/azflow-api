@@ -19,6 +19,11 @@ func GetAudioUrls(userId string) ([]string, error) {
 
 // CreateAudio an orchestrator func to do openai tts, upload file, and return path
 func CreateAudio(userId string, text string, voice string) (string, error) {
+	l := len(text)
+	if l < 3000 {
+		return "", fmt.Errorf("content too short (%d < 3000)", l)
+	}
+
 	fileName, filePath, outFile := CreateFile()
 	defer outFile.Close()
 	// defer os.Remove(outFile.Name())
