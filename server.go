@@ -1,8 +1,8 @@
 package main
 
 import (
-	"azflow-api/azure"
-	"azflow-api/domain/auth"
+	"azflow-api/azure/auth"
+	"azflow-api/azure/storage"
 	"azflow-api/graph"
 	"github.com/joho/godotenv"
 
@@ -36,12 +36,17 @@ func main() {
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 		Debug:            true})
 
 	router.Use(c.Handler, auth.Middleware())
 
 	database.Init()
+	storage.Init()
+	auth.Init()
+
 	defer func() {
 		err := database.CloseDB()
 		if err != nil {
@@ -49,8 +54,6 @@ func main() {
 		}
 	}()
 	database.Migrate()
-
-	azure.Init()
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(&transport.Websocket{

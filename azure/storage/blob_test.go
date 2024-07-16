@@ -1,4 +1,4 @@
-package azure
+package storage
 
 import (
 	"github.com/Azure/azure-storage-blob-go/azblob"

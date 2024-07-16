@@ -1,14 +1,14 @@
 package links
 
 import (
-	"azflow-api/domain/users"
+	"azflow-api/domain/user"
 )
 
 type Link struct {
 	ID      string
 	Title   string
 	Address string
-	User    *users.User
+	User    *user.User
 }
 
 func GetAll() []Link {
@@ -31,7 +31,7 @@ func GetAll() []Link {
 	//	if err != nil {
 	//		log.Fatal(err)
 	//	}
-	//	link.User = &users.User{ID: id, Username: username}
+	//	link.User = &user.User{ID: id, Username: username}
 	//	links = append(links, link)
 	//}
 	//if err = rows.Err(); err != nil {

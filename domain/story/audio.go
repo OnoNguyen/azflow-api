@@ -1,7 +1,7 @@
 package story
 
 import (
-	"azflow-api/azure"
+	"azflow-api/azure/storage"
 	"azflow-api/openai"
 	"fmt"
 	"os"
@@ -14,14 +14,15 @@ var (
 )
 
 func GetAudioUrls(userId string) ([]string, error) {
-	return azure.GetFileUrls(ContainerName, userId)
+	return storage.GetFileUrls(ContainerName, userId)
 }
 
 // CreateAudio an orchestrator func to do openai tts, upload file, and return path
 func CreateAudio(userId string, text string, voice string) (string, error) {
+	MinTextLength := 2500
 	l := len(text)
-	if l < 3000 {
-		return "", fmt.Errorf("content too short (%d < 3000)", l)
+	if l < MinTextLength {
+		return "", fmt.Errorf("content too short (%d < %d)", l, MinTextLength)
 	}
 
 	fileName, filePath, outFile := CreateFile()
@@ -33,7 +34,7 @@ func CreateAudio(userId string, text string, voice string) (string, error) {
 	azureFilePath := fmt.Sprintf("%s/%s", userId, fileName)
 	fmt.Println("Uploading MP3 file to Azure Blob Storage...", azureFilePath)
 
-	err := azure.UploadFile(ContainerName, azureFilePath, filePath)
+	err := storage.UploadFile(ContainerName, azureFilePath, filePath)
 	if err != nil {
 		return "", err
 	}
