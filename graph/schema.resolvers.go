@@ -14,7 +14,7 @@ import (
 
 // CreateAudio is the resolver for the createAudio field.
 func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInput) (string, error) {
-	userId, err := auth.GetUiserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -24,7 +24,7 @@ func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInp
 
 // AudioUrls is the resolver for the audioUrls field.
 func (r *mutationResolver) AudioUrls(ctx context.Context) ([]string, error) {
-	userId, _ := auth.GetUiserId(ctx)
+	userId, _ := auth.GetUserId(ctx)
 
 	return story.GetAudioUrls(userId)
 }

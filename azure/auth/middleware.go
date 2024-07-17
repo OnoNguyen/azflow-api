@@ -149,14 +149,14 @@ func ForContext(ctx context.Context) *user.User {
 	return u
 }
 
-func GetUiserId(ctx context.Context) (string, error) {
+func GetUserId(ctx context.Context) (string, error) {
 	u, ok := ctx.Value(userCtxKey).(*user.User)
 
 	if !ok {
 		return "", fmt.Errorf("unauthenticated")
 	}
 
-	println("current user id", u.Email)
+	println("User id", u.Email)
 
 	return u.Email, nil
 }

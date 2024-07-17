@@ -23,7 +23,7 @@ func Tts(input string, voice string, outFile *os.File) {
 	token := "Bearer " + os.Getenv("OPENAI_API_KEY")
 
 	requestBody, err := json.Marshal(map[string]string{
-		"model": "openai-1",
+		"model": "tts-1",
 		"input": input,
 		"voice": voice,
 	})
