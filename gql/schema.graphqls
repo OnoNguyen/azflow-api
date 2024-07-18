@@ -3,11 +3,18 @@ input AudioInput {
   voice: String!
 }
 
+input SignupInput {
+  extId: String!
+  email: String!
+
+}
+
 type Query {
   trackUrl: String!
 }
 
 type Mutation {
+  signUp(input: SignupInput): Int!
   createAudio(input: AudioInput!): String!
   audioUrls: [String!]!
 }

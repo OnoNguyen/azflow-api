@@ -1,4 +1,4 @@
-package graph
+package gql
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -7,26 +7,41 @@ package graph
 import (
 	"azflow-api/azure/auth"
 	"azflow-api/domain/story"
-	"azflow-api/graph/model"
+	"azflow-api/gql/model"
 	"azflow-api/openai"
 	"context"
 )
 
+// SignUp is the resolver for the signUp field.
+func (r *mutationResolver) SignUp(ctx context.Context, input *model.SignupInput) (int, error) {
+	member, err := auth.GetMember(ctx)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return member.Signup()
+}
+
 // CreateAudio is the resolver for the createAudio field.
 func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInput) (string, error) {
-	userId, err := auth.GetUserId(ctx)
+	member, err := auth.GetMember(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	return story.CreateAudio(userId, input.Text, input.Voice)
+	return story.CreateAudio(member.Email, input.Text, input.Voice)
 }
 
 // AudioUrls is the resolver for the audioUrls field.
 func (r *mutationResolver) AudioUrls(ctx context.Context) ([]string, error) {
-	userId, _ := auth.GetUserId(ctx)
+	member, err := auth.GetMember(ctx)
 
-	return story.GetAudioUrls(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return story.GetAudioUrls(member.Email)
 }
 
 // TrackURL is the resolver for the trackUrl field.

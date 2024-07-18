@@ -34,10 +34,10 @@ func TestMiddleware(t *testing.T) {
 
 	// Define a handler that will use the middleware
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := ForContext(r.Context())
-		if user != nil {
+		member := ForContext(r.Context())
+		if member != nil {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Authenticated user: " + user.Username))
+			w.Write([]byte("Authenticated account: " + member.Email))
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Unauthenticated request"))
@@ -59,7 +59,7 @@ func TestMiddleware(t *testing.T) {
 
 	// Check the response status code and body
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Contains(t, rr.Body.String(), "Authenticated user:")
+	assert.Contains(t, rr.Body.String(), "Authenticated account:")
 
 	// Test with no Authorization header (unauthenticated)
 	req = httptest.NewRequest("GET", "/api", nil)

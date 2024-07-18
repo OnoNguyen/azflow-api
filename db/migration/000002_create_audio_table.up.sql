@@ -1,0 +1,11 @@
+
+CREATE TABLE IF NOT EXISTS audio (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ext_id VARCHAR(127) NOT NULL UNIQUE,
+    title VARCHAR(127) NOT NULL,
+    file_name VARCHAR(127) NOT NULL,
+    member_id INTEGER NOT NULL,
+    CONSTRAINT fk_member
+    FOREIGN KEY(member_id)
+    REFERENCES member(id)
+);

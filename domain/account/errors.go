@@ -1,4 +1,4 @@
-package user
+package account
 
 type WrongUsernameOrPasswordError struct {
 }

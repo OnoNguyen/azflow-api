@@ -3,11 +3,10 @@ package main
 import (
 	"azflow-api/azure/auth"
 	"azflow-api/azure/storage"
-	"azflow-api/graph"
+	"azflow-api/db"
+	"azflow-api/gql"
 	"github.com/joho/godotenv"
 
-	//database "azflow-api/domain/pkg/db/mysql"
-	database "azflow-api/domain/pkg/db/postgresql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -43,19 +42,18 @@ func main() {
 
 	router.Use(c.Handler, auth.Middleware())
 
-	database.Init()
+	db.Init()
 	storage.Init()
 	auth.Init()
 
 	defer func() {
-		err := database.CloseDB()
+		err := db.CloseDB()
 		if err != nil {
 			log.Fatal(err)
 		}
 	}()
-	database.Migrate()
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(gql.NewExecutableSchema(gql.Config{Resolvers: &gql.Resolver{}}))
 	srv.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {

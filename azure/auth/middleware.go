@@ -1,12 +1,11 @@
 package auth
 
 import (
-	"azflow-api/domain/user"
+	"azflow-api/domain/account"
 	"context"
 	"crypto/rsa"
 	"fmt"
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
-	"github.com/MicahParks/keyfunc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/lestrrat-go/jwx/jwk"
 	"net/http"
@@ -15,15 +14,12 @@ import (
 
 type contextKey string
 
-const userCtxKey contextKey = "user"
+const userCtxKey contextKey = "account"
 
 var (
 	ClientID     string
 	ClientSecret string
 	Authority    string
-	TenantID     string
-	JwksURL      string
-	Jwks         *keyfunc.JWKS
 )
 
 func Middleware() func(http.Handler) http.Handler {
@@ -45,14 +41,14 @@ func Middleware() func(http.Handler) http.Handler {
 				return
 			}
 
-			// Extract user information from the token claims
+			// Extract account information from the token claims
 			if claims, ok := verified.Claims.(jwt.MapClaims); ok && verified.Valid {
-				user := &user.User{
-					Username: claims["preferred_username"].(string),
-					Email:    claims["preferred_username"].(string),
+				user := &account.Member{
+					Email: claims["preferred_username"].(string),
+					ExtId: claims["oid"].(string),
 				}
 
-				// Pass the request to the next handler with user info in context
+				// Pass the request to the next handler with account info in context
 				ctx := context.WithValue(r.Context(), userCtxKey, user)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
@@ -70,7 +66,7 @@ func verifyToken(tokenString string, context context.Context) (*jwt.Token, error
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		//return Jwks.Keyfunc(token)
+
 		kid, ok := token.Header["kid"].(string)
 		if !ok {
 			return nil, fmt.Errorf("kid header not found")
@@ -129,34 +125,25 @@ func Init() {
 	ClientID = os.Getenv("AZURE_ENTRA_CLIENT_ID")
 	ClientSecret = os.Getenv("AZURE_ENTRA_CLIENT_SECRET")
 	Authority = os.Getenv("AZURE_ENTRA_AUTHORITY")
-	TenantID = os.Getenv("AZURE_ENTRA_TENANT_ID")
-	JwksURL = fmt.Sprintf("%s/discovery/v2.0/keys", Authority)
-
-	var err error
-	//initializes the JWKS from Microsoft Entra
-	Jwks, err = keyfunc.Get(JwksURL, keyfunc.Options{})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func ForContext(ctx context.Context) *user.User {
-	u, ok := ctx.Value(userCtxKey).(*user.User)
+func ForContext(ctx context.Context) *account.Member {
+	u, ok := ctx.Value(userCtxKey).(*account.Member)
 	if !ok {
-		fmt.Println("no user in context")
+		fmt.Println("no account in context")
 		return nil
 	}
 	return u
 }
 
-func GetUserId(ctx context.Context) (string, error) {
-	u, ok := ctx.Value(userCtxKey).(*user.User)
+func GetMember(ctx context.Context) (*account.Member, error) {
+	u, ok := ctx.Value(userCtxKey).(*account.Member)
 
 	if !ok {
-		return "", fmt.Errorf("unauthenticated")
+		return nil, fmt.Errorf("unauthenticated")
 	}
 
-	println("User id", u.Email)
+	println("Member id", u.Email)
 
-	return u.Email, nil
+	return u, nil
 }

@@ -13,8 +13,8 @@ var (
 	ContainerName = "audio"
 )
 
-func GetAudioUrls(userId string) ([]string, error) {
-	return storage.GetFileUrls(ContainerName, userId)
+func GetAudioUrls(userEmail string) ([]string, error) {
+	return storage.GetFileUrls(ContainerName, userEmail)
 }
 
 // CreateAudio an orchestrator func to do openai tts, upload file, and return path

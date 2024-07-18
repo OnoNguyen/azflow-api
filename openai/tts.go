@@ -13,7 +13,8 @@ func GetTrack() string {
 	return "https://azflowresources.blob.core.windows.net/audio/speech.mp3?sp=r&st=2024-06-20T07:58:16Z&se=2024-06-20T15:58:16Z&spr=https&sv=2022-11-02&sr=b&sig=%2Fcp3XkF8N49KxseP0sSoDtD0oUHTtvmb5G4k5rz9ie0%3D"
 }
 
-// Tts takes a string input and a voice string and returns the responsed voice as an io.ReadCloser if successful.
+// Tts stands for text to speech
+// It sends a POST request to the OpenAI API and takes a string input and a voice string and returns the responded voice as an io.ReadCloser if successful.
 func Tts(input string, voice string, outFile *os.File) {
 	if voice == "" {
 		voice = "onyx"
