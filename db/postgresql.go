@@ -23,7 +23,6 @@ func Init() {
 		panic(err)
 	}
 	Conn = conn
-	Migrate()
 }
 
 func CloseDB() error {

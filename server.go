@@ -43,6 +43,7 @@ func main() {
 	router.Use(c.Handler, auth.Middleware())
 
 	db.Init()
+	db.Migrate()
 	storage.Init()
 	auth.Init()
 

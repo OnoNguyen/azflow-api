@@ -30,18 +30,18 @@ func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInp
 		return "", err
 	}
 
-	return story.CreateAudio(member.Email, input.Text, input.Voice)
+	return story.CreateAudio(member.Email, member.ExtId, input.Text, input.Voice)
 }
 
 // AudioUrls is the resolver for the audioUrls field.
 func (r *mutationResolver) AudioUrls(ctx context.Context) ([]string, error) {
-	member, err := auth.GetMember(ctx)
-
-	if err != nil {
-		return nil, err
+	member, _ := auth.GetMember(ctx)
+	email := ""
+	if member != nil {
+		email = member.Email
 	}
 
-	return story.GetAudioUrls(member.Email)
+	return story.GetAudios(email)
 }
 
 // TrackURL is the resolver for the trackUrl field.
