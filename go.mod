@@ -15,6 +15,7 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/jwx v1.2.29
+	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.11
@@ -41,7 +42,6 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
-	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-ieproxy v0.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c // indirect
 	github.com/pkg/errors v0.9.1 // indirect

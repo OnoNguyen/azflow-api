@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestPersistAudio(t *testing.T) {
+func TestInsertAudio(t *testing.T) {
 	// init db connection
 	err := godotenv.Load("../../.env")
 	if err != nil {
@@ -17,7 +17,7 @@ func TestPersistAudio(t *testing.T) {
 	db.Init()
 
 	// Call the function
-	_, err = persistAudio("test@example.com", "ext-id-member-123", "ext-id-audio-123", "testfileName1")
+	_, err = insertAudio("test@example.com", "ext-id-member-123", "ext-id-audio-124", "testfileName1", "test title")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}

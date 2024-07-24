@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/lib/pq"
 	"os"
 	"path/filepath"
 	"time"
@@ -18,16 +19,71 @@ var (
 
 // GetAudios gets the urls to all audio files for a user if userEmail has value
 // otherwise gets the urls to all audio files
-func GetAudios(userEmail string) ([]string, error) {
-	return storage.GetFileUrls(ContainerName, userEmail)
+func GetAudios(userEmail string) ([]*TAudio, error) {
+	fis, err := storage.GetFileInfos(ContainerName, userEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0, len(fis))
+	for _, fi := range fis {
+		names = append(names, fi.Name)
+	}
+
+	titles, err1 := getTitlesFromDB(names)
+	if err1 != nil {
+		return nil, err1
+	}
+
+	var audios []*TAudio
+	for _, fi := range fis {
+		fmt.Sprintf("Name: %s, Title: %s", fi.Name, titles[fi.Name])
+		audios = append(audios, &TAudio{
+			Url:  fi.Url,
+			Name: titles[fi.Name],
+		})
+	}
+
+	return audios, nil
 }
 
-// CreateAudio does openai tts, upload file, and return path
-func CreateAudio(memberEmail string, memberExtId string, text string, voice string) (string, error) {
+// getTitlesFromDB gets a list of audio Name from db via CTE,
+// where input is names array,
+// and output is a list of matching titles
+func getTitlesFromDB(names []string) (map[string]string, error) {
+	query := `
+        WITH name_cte AS (
+            SELECT unnest($1::text[]) AS name
+        )
+        SELECT n.name, COALESCE(a.title, '') AS title
+        FROM name_cte n
+        LEFT JOIN audio a ON a.ext_id = n.name;
+    `
+
+	var titles []*TTitle
+	err := pgxscan.Select(context.Background(), db.Conn, &titles, query, pq.Array(names))
+	if err != nil {
+		return nil, err
+	}
+
+	res := make(map[string]string, len(titles))
+	for _, t := range titles {
+		res[t.Name] = t.Title
+	}
+
+	return res, nil
+}
+
+// CreateAudio does openai tts, upload file, persist do db, and return path
+func CreateAudio(memberEmail string, memberExtId string, text string, voice string, title string) (string, error) {
 	MinTextLength := 2500
+	MaxTextLength := 4000
 	l := len(text)
 	if l < MinTextLength {
 		return "", fmt.Errorf("content too short (%d < %d)", l, MinTextLength)
+	}
+	if l > MaxTextLength {
+		return "", fmt.Errorf("content too long (%d > %d)", l, MaxTextLength)
 	}
 
 	fileName, filePath, outFile := createFile()
@@ -44,8 +100,8 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 		return "", err
 	}
 
-	// note: audioExtId is azureFilePath for now
-	_, err = persistAudio(memberEmail, memberExtId, azureFilePath, fileName)
+	// note: audioExtId is azureFilePath
+	_, err = insertAudio(memberEmail, memberExtId, azureFilePath, fileName, title)
 	if err != nil {
 		return "", err
 	}
@@ -53,8 +109,14 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 	return azureFilePath, nil
 }
 
-// persistAudio inserts or updates audio info into the database
-func persistAudio(memberEmail string, memberExtId string, audioExtId string, fileName string) (int, error) {
+// EditAudio edits audio title
+func EditAudio(extId string, title string) (string, error) {
+	c, err := db.Conn.Exec(context.Background(), "UPDATE audio SET title = $1 WHERE ext_id = $2", title, extId)
+	return c.String(), err
+}
+
+// insertAudio inserts audio info into the database
+func insertAudio(memberEmail string, memberExtId string, audioExtId string, fileName string, title string) (int, error) {
 	ctx := context.Background()
 
 	query := `
@@ -72,16 +134,14 @@ func persistAudio(memberEmail string, memberExtId string, audioExtId string, fil
 		SELECT id FROM member WHERE ext_id = $2::text
 	)
 	INSERT INTO audio (member_id, ext_id, file_name, title)
-	VALUES ((SELECT id FROM member_data), $3, $4, $4)
-	ON CONFLICT (ext_id) DO UPDATE
-	SET title = EXCLUDED.title
+	VALUES ((SELECT id FROM member_data), $3, $4, $5)
 	RETURNING id;
 	`
 
 	var audioID int
-	err := pgxscan.Get(ctx, db.Conn, &audioID, query, memberEmail, memberExtId, audioExtId, fileName)
+	err := pgxscan.Get(ctx, db.Conn, &audioID, query, memberEmail, memberExtId, audioExtId, fileName, title)
 	if err != nil {
-		return 0, fmt.Errorf("failed to upsert audio info: %w", err)
+		return 0, fmt.Errorf("failed to insert audio info: %w", err)
 	}
 	return audioID, nil
 }

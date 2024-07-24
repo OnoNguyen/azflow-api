@@ -1,6 +1,12 @@
 input AudioInput {
   text: String!
   voice: String!
+  title: String!
+}
+
+input EditAudioInput {
+  extId: String!
+  title: String!
 }
 
 input SignupInput {
@@ -9,12 +15,18 @@ input SignupInput {
 
 }
 
+type Audio {
+  url: String!
+  title: String!
+}
+
 type Query {
   trackUrl: String!
+  getAudios: [Audio!]!
 }
 
 type Mutation {
   signUp(input: SignupInput): Int!
   createAudio(input: AudioInput!): String!
-  audioUrls: [String!]!
+  editAudio(input: EditAudioInput!): String!
 }

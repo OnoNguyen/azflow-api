@@ -30,23 +30,45 @@ func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInp
 		return "", err
 	}
 
-	return story.CreateAudio(member.Email, member.ExtId, input.Text, input.Voice)
+	return story.CreateAudio(member.Email, member.ExtId, input.Text, input.Voice, input.Title)
 }
 
-// AudioUrls is the resolver for the audioUrls field.
-func (r *mutationResolver) AudioUrls(ctx context.Context) ([]string, error) {
+// EditAudio is the resolver for the editAudio field.
+func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioInput) (string, error) {
+	_, err := auth.GetMember(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return story.EditAudio(input.ExtID, input.Title)
+}
+
+// TrackURL is the resolver for the trackUrl field.
+func (r *queryResolver) TrackURL(ctx context.Context) (string, error) {
+	return openai.GetTrack(), nil
+}
+
+// GetAudios is the resolver for the getAudios field.
+func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
 	member, _ := auth.GetMember(ctx)
 	email := ""
 	if member != nil {
 		email = member.Email
 	}
 
-	return story.GetAudios(email)
-}
+	as, err := story.GetAudios(email)
 
-// TrackURL is the resolver for the trackUrl field.
-func (r *queryResolver) TrackURL(ctx context.Context) (string, error) {
-	return openai.GetTrack(), nil
+	if err != nil {
+		return nil, err
+	}
+
+	audios := make([]*model.Audio, 0, len(as))
+	for _, a := range as {
+		b := model.Audio{Title: a.Name, URL: a.Url}
+		audios = append(audios, &b)
+	}
+
+	return audios, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -80,18 +80,18 @@ func TestGetFileUrls(t *testing.T) {
 	path := "1a0b3b6f-52c6-4039-afca-d7f93f9ff963"
 
 	// Run the function under test
-	urls, err := GetFileUrls(containerName, path)
+	urls, err := GetFileInfos(containerName, path)
 
 	// Check for errors
 	if err != nil {
-		t.Fatalf("GetFileUrls failed: %v", err)
+		t.Fatalf("GetFileInfos failed: %v", err)
 	}
 
 	t.Log(urls)
 
 	// Verify each URL format
 	for _, u := range urls {
-		parsedURL, err := url.Parse(u)
+		parsedURL, err := url.Parse(u.Url)
 		if err != nil {
 			t.Errorf("Failed to parse URL %s: %v", u, err)
 			continue
