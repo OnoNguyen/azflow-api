@@ -11,4 +11,5 @@ Tech stacks:
   - note: remember to run the above anytime there's a change in the resolvers or schema.
 
 - postgres:
-  - Create an empty Postgres db and put its credentials into a local copy of `.template.env` so the app can pickup and seed it.
+  - pull docker postgres `docker pull postgres` and start the instance
+  - create an empty Postgres db (use pgAdmin or CLI) and put its credentials into a local copy of `.template.env` so the app can pickup and seed it.
