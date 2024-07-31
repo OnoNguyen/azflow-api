@@ -68,7 +68,12 @@ func getTitlesFromDB(names []string) (map[string]string, error) {
 
 	res := make(map[string]string, len(titles))
 	for _, t := range titles {
-		res[t.Name] = t.Title
+		// if title is empty, use Name as fallback
+		title := t.Title
+		if title == "" {
+			title = t.Name
+		}
+		res[t.Name] = title
 	}
 
 	return res, nil

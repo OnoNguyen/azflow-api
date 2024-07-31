@@ -43,6 +43,15 @@ func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioI
 	return story.EditAudio(input.ExtID, input.Title)
 }
 
+// CreateBookSummary is the resolver for the createBookSummary field.
+func (r *mutationResolver) CreateBookSummary(ctx context.Context, input *model.BookInput) (string, error) {
+	_, err := auth.GetMember(ctx)
+	if err != nil {
+		return "", err
+	}
+	return story.CreateBookSummary(input.Title)
+}
+
 // TrackURL is the resolver for the trackUrl field.
 func (r *queryResolver) TrackURL(ctx context.Context) (string, error) {
 	return openai.GetTrack(), nil

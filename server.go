@@ -5,6 +5,7 @@ import (
 	"azflow-api/azure/storage"
 	"azflow-api/db"
 	"azflow-api/gql"
+	"azflow-api/openai"
 	"github.com/joho/godotenv"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -46,6 +47,7 @@ func main() {
 	db.Migrate()
 	storage.Init()
 	auth.Init()
+	openai.Init()
 
 	defer func() {
 		err := db.CloseDB()
