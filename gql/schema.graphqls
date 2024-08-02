@@ -5,7 +5,7 @@ input AudioInput {
 }
 
 input EditAudioInput {
-  extId: String!
+  id: Int!
   title: String!
 }
 
@@ -21,6 +21,7 @@ input BookInput {
 type Audio {
   url: String!
   title: String!
+  id: Int!
 }
 
 type Query {

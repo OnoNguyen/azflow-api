@@ -40,7 +40,7 @@ func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioI
 		return "", err
 	}
 
-	return story.EditAudio(input.ExtID, input.Title)
+	return story.EditAudio(input.ID, input.Title)
 }
 
 // CreateBookSummary is the resolver for the createBookSummary field.
@@ -73,7 +73,7 @@ func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
 
 	audios := make([]*model.Audio, 0, len(as))
 	for _, a := range as {
-		b := model.Audio{Title: a.Name, URL: a.Url}
+		b := model.Audio{Title: a.Name, URL: a.Url, ID: a.Id}
 		audios = append(audios, &b)
 	}
 
