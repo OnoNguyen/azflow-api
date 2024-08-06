@@ -1,0 +1,65 @@
+trigger:
+  - main
+
+variables:
+  # Container registry details
+  acrName: azflow
+  imageName: azflow-api
+  tag: $(Build.BuildId)
+
+  # Azure Resource Manager details
+  subscriptionId: '05f2113e-370b-4489-ae25-7d9e721459fc'
+  resourceGroupName: 'azflow_group'
+  clusterName: 'azflow'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UseGoVersion@0
+            inputs:
+              version: '1.16'
+          - script: |
+              go version
+              go mod tidy
+              go build -o azflow-api .
+            displayName: 'Build Go application'
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(acrName)'
+              repository: '$(imageName)'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                $(tag)
+                latest
+          - publish: $(Pipeline.Workspace)/.docker/repository
+            artifact: 'drop'
+
+  - stage: Deploy
+    jobs:
+      - deployment: Deploy
+        environment: 'aks'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: Kubernetes@1
+                  inputs:
+                    connectionType: 'Azure Resource Manager'
+                    azureSubscription: '$(subscriptionId)'
+                    azureResourceGroup: '$(resourceGroupName)'
+                    kubernetesCluster: '$(clusterName)'
+                    namespace: 'default'
+                    command: 'apply'
+                    useConfigurationFile: true
+                    configuration: '$(Pipeline.Workspace)/deployment.yml'
+                    secretType: 'dockerRegistry'
+                    containerRegistryType: 'Azure Container Registry'
+                    azureContainerRegistry: '$(acrName).azurecr.io'
+                    secretName: 'acr-auth'
