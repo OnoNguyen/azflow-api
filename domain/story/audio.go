@@ -55,7 +55,7 @@ func GetAudios(userEmail string) ([]*TAudio, error) {
 
 // getInfoFromDB gets a list of audio info from db via CTE,
 // where input is names array,
-// and output is a list of matching titles
+// and output is a list of matching titles and ids
 func getInfoFromDB(names []string) ([]*TAudioInfo, error) {
 	query := `
         WITH name_cte AS (
@@ -63,7 +63,7 @@ func getInfoFromDB(names []string) ([]*TAudioInfo, error) {
         )
         SELECT n.name, COALESCE(a.title, '') AS title, COALESCE(a.id, -1) AS id 
         FROM name_cte n
-        LEFT JOIN audio a ON a.ext_id = n.name;
+        JOIN audio a ON n.name = a.ext_id;
     `
 
 	var audios []*TAudioInfo
