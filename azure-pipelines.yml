@@ -48,17 +48,14 @@ stages:
           displayName: 'Publish artifact'
           condition: succeededOrFailed()
 
-        - task: Docker@2
+        - task: DockerCompose@1
           inputs:
-            containerRegistry: '$(acrName)'
-            repository: '$(imageName)'
-            command: 'buildAndPush'
-            Dockerfile: '**/Dockerfile'
-            tags: |
-              $(tag)
-              latest
-        - publish: $(Pipeline.Workspace)/.docker/repository
-          artifact: 'drop'
+            containerregistrytype: 'Azure Container Registry'
+            azureSubscription: 'azflow-resource-manager'
+            azureContainerRegistry: '{"loginServer":"azflow.azurecr.io", "id" : "/subscriptions/05f2113e-370b-4489-ae25-7d9e721459fc/resourceGroups/azflow_group/providers/Microsoft.ContainerRegistry/registries/azflow"}'
+            dockerComposeFile: '**/Dockerfile'
+            action: 'Run a Docker Compose command'
+            dockerComposeCommand: 'rm --all'
 
   - stage: Deploy
     jobs:
