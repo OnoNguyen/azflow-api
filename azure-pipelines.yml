@@ -28,24 +28,33 @@ stages:
           inputs:
             version: '1.20'
           displayName: 'Use Go 1.20'
+        
+        - task: Cache@2
+          inputs:
+            key: 'go | "$(Agent.OS)" | go.sum'
+            restoreKeys: |
+              go | "$(Agent.OS)"
+            path: $(GOPATH)/pkg/mod
+          displayName: 'Restore Go Modules Cache'
 
         - task: Go@0
-          displayName: 'go mod vendor'
+          displayName: 'go mod download'
           inputs:
             command: 'custom'
             customCommand: 'mod'
-            arguments: 'vendor'
-
-        - task: Go@0
-          displayName: 'go get'
-          inputs:
-            arguments: '-d'
+            arguments: 'download'
 
         - task: Go@0
           displayName: 'go build'
           inputs:
             command: build
             arguments: '-o "$(System.TeamProject).exe"'
+
+        - task: Cache@2
+          inputs:
+            key: 'go | "$(Agent.OS)" | go.sum'
+            path: $(GOPATH)/pkg/mod
+          displayName: 'Save Go Modules Cache'
 
         - task: ArchiveFiles@2
           displayName: 'Archive files'
