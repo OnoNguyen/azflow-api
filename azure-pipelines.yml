@@ -38,9 +38,8 @@ stages:
           displayName: 'Restore Go Modules Cache'
 
         - script: |
-            go mod vendor
-            go build -mod=vendor -o azflow-api
-          displayName: 'Build Go Project Using Vendor'
+            go build
+          displayName: 'Build Go Project'
 
         - task: Cache@2
           inputs:
