@@ -38,6 +38,10 @@ stages:
           displayName: 'Restore Go Modules Cache'
 
         - script: |
+            go mod download
+          displayName: 'Download dependencies (and cache)'
+
+        - script: |
             go build
           displayName: 'Build Go Project'
 
