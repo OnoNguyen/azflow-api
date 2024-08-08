@@ -37,18 +37,10 @@ stages:
             path: $(GOPATH)/pkg/mod
           displayName: 'Restore Go Modules Cache'
 
-        - task: Go@0
-          displayName: 'go mod download'
-          inputs:
-            command: 'custom'
-            customCommand: 'mod'
-            arguments: 'download'
-
-        - task: Go@0
-          displayName: 'go build'
-          inputs:
-            command: build
-            arguments: '-o "$(System.TeamProject).exe"'
+        - script: |
+            go mod vendor
+            go build -mod=vendor -o azflow-api
+          displayName: 'Build Go Project Using Vendor'
 
         - task: Cache@2
           inputs:
