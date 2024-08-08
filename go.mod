@@ -8,9 +8,9 @@ require (
 	github.com/Azure/azure-storage-blob-go v0.15.0
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2
 	github.com/georgysavva/scany/v2 v2.1.3
-	github.com/go-chi/chi v1.5.5
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
+	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.5.1
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/joho/godotenv v1.5.1

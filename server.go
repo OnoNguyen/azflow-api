@@ -6,13 +6,12 @@ import (
 	"azflow-api/db"
 	"azflow-api/gql"
 	"azflow-api/openai"
-	"github.com/joho/godotenv"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
@@ -32,7 +31,7 @@ func main() {
 		port = defaultPort
 	}
 
-	router := chi.NewRouter()
+	r := mux.NewRouter()
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -41,7 +40,7 @@ func main() {
 		AllowCredentials: true,
 		Debug:            true})
 
-	router.Use(c.Handler, auth.Middleware())
+	r.Use(c.Handler, auth.Middleware())
 
 	db.Init()
 	db.Migrate()
@@ -69,10 +68,10 @@ func main() {
 		},
 	})
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/api"))
-	router.Handle("/api", srv)
+	r.Handle("/", playground.Handler("GraphQL playground", "/api"))
+	r.Handle("/api", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 
-	log.Fatal(http.ListenAndServe("localhost:"+port, router))
+	log.Fatal(http.ListenAndServe("localhost:"+port, r))
 }
