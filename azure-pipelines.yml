@@ -13,7 +13,7 @@ variables:
   clusterName: 'azflow'
 
   GOBIN: '$(GOPATH)/bin' # Go binaries path
-  GOROOT: '/usr/local/go1.22' # Go installation path
+  GOROOT: '/usr/local/go1.10' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
   modulePath: '$(GOPATH)/src/github.com/$(build.repository.name)' # Path to the module's code
 
@@ -25,7 +25,7 @@ stages:
           vmImage: 'ubuntu-latest'
         steps:
         - task: GoTool@0
-          displayName: 'Use Go 1.22'
+          displayName: 'Use Go 1.10'
 
         - task: Go@0
           displayName: 'go get'
