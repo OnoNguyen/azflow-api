@@ -1,19 +1,10 @@
-# Dockerfile
-FROM golang:1.20 as builder
-
-WORKDIR /app
-
-COPY . .
-
-RUN go mod tidy
-RUN go build -o azflow-api .
-
 # final stage
 FROM alpine:latest
 
 WORKDIR /root/
 
-COPY --from=builder /app/azflow-api .
+# Copy the pre-built binary from the pipeline workspace
+COPY azflow-api .
 
 EXPOSE 8080
 
