@@ -80,9 +80,9 @@ stages:
                 - task: Kubernetes@1
                   inputs:
                     connectionType: 'Azure Resource Manager'
-                    azureSubscriptionEndpoint: $(subscriptionEndpoint)
-                    azureResourceGroup: ${resourceGroupName}
-                    kubernetesCluster: ${clusterName}
+                    azureSubscriptionEndpoint: '$(subscriptionEndpoint)'
+                    azureResourceGroup: '$(resourceGroupName)'
+                    kubernetesCluster: '$(clusterName)'
                     namespace: 'default'
                     command: 'apply'
                     useConfigurationFile: true
