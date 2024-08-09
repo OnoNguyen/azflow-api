@@ -8,7 +8,7 @@ variables:
   tag: $(Build.BuildId)
 
   # Azure Resource Manager details
-  subscriptionId: '05f2113e-370b-4489-ae25-7d9e721459fc'
+  subscriptionEndpoint: 'Visual Studio Premium with MSDN(05f2113e-370b-4489-ae25-7d9e721459fc)'
   resourceGroupName: 'azflow_group'
   clusterName: 'azflow'
 
@@ -47,7 +47,7 @@ stages:
 
         - task: Cache@2
           inputs:
-            key: 'go | "$(Agent.OS)" | go.sum'
+            key: 'go | "$(Agent.OS)" | go.sum | v1' # Update the key to force a fresh cache
             path: $(GOPATH)/pkg/mod
           displayName: 'Save Go Modules Cache'
 
@@ -80,9 +80,9 @@ stages:
                 - task: Kubernetes@1
                   inputs:
                     connectionType: 'Azure Resource Manager'
-                    azureSubscriptionEndpoint: 'Visual Studio Premium with MSDN(05f2113e-370b-4489-ae25-7d9e721459fc)'
-                    azureResourceGroup: 'azflow_group'
-                    kubernetesCluster: 'azflow'
+                    azureSubscriptionEndpoint: $(subscriptionEndpoint)
+                    azureResourceGroup: ${resourceGroupName}
+                    kubernetesCluster: ${clusterName}
                     namespace: 'default'
                     command: 'apply'
                     useConfigurationFile: true
