@@ -57,18 +57,18 @@ stages:
             rootFolderOrFile: '$(Build.Repository.LocalPath)'
             includeRootFolder: False
 
+        - task: Docker@2
+          displayName: 'Build Docker image'
+          inputs:
+            command: 'buildAndPush'
+            repository: '$(acrName).azurecr.io/$(imageName)'
+            Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+            tags: '$(tag)'
+            containerRegistry: '$(acrName).azurecr.io'
+        
         - task: PublishBuildArtifacts@1
           displayName: 'Publish artifact'
           condition: succeededOrFailed()
-
-        - task: DockerCompose@1
-          inputs:
-            containerregistrytype: 'Azure Container Registry'
-            azureSubscription: 'azflow-resource-manager'
-            azureContainerRegistry: '{"loginServer":"azflow.azurecr.io", "id" : "/subscriptions/05f2113e-370b-4489-ae25-7d9e721459fc/resourceGroups/azflow_group/providers/Microsoft.ContainerRegistry/registries/azflow"}'
-            dockerComposeFile: '**/Dockerfile'
-            action: 'Run a Docker Compose command'
-            dockerComposeCommand: 'rm --all'
 
   - stage: Deploy
     jobs:
