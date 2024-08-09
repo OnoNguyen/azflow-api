@@ -80,9 +80,9 @@ stages:
                 - task: Kubernetes@1
                   inputs:
                     connectionType: 'Azure Resource Manager'
-                    azureSubscription: '$(subscriptionId)'
-                    azureResourceGroup: '$(resourceGroupName)'
-                    kubernetesCluster: '$(clusterName)'
+                    azureSubscriptionEndpoint: 'Visual Studio Premium with MSDN(05f2113e-370b-4489-ae25-7d9e721459fc)'
+                    azureResourceGroup: 'azflow_group'
+                    kubernetesCluster: 'azflow'
                     namespace: 'default'
                     command: 'apply'
                     useConfigurationFile: true
