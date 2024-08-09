@@ -42,14 +42,8 @@ stages:
           displayName: 'Download dependencies (and cache)'
 
         - script: |
-            go build -o $(Build.ArtifactStagingDirectory)/azflow-api
+            go build -o $(Build.SourcesDirectory)/azflow-api
           displayName: 'Build Go Project'
-
-        - task: PublishBuildArtifacts@1
-          inputs:
-            pathToPublish: '$(Build.ArtifactStagingDirectory)/azflow-api'
-            artifactName: 'azflow-api'
-          displayName: 'Publish Go Binary'
 
         - task: Cache@2
           inputs:
@@ -71,12 +65,7 @@ stages:
             Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
             tags: '$(tag)'
             containerRegistry: 'azflowACR'
-            buildContext: '$(Pipeline.Workspace)/azflow-api'
-
-        
-        - task: PublishBuildArtifacts@1
-          displayName: 'Publish artifact'
-          condition: succeededOrFailed()
+            buildContext: '$(Build.SourcesDirectory)'
 
   - stage: Deploy
     jobs:
