@@ -62,7 +62,7 @@ stages:
           inputs:
             rootFolderOrFile: '$(Build.Repository.LocalPath)'
             includeRootFolder: False
-                    
+
         - task: Docker@2
           displayName: 'Build Docker image'
           inputs:
@@ -71,6 +71,8 @@ stages:
             Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
             tags: '$(tag)'
             containerRegistry: 'azflowACR'
+            buildContext: '$(Pipeline.Workspace)/azflow-api'
+
         
         - task: PublishBuildArtifacts@1
           displayName: 'Publish artifact'
