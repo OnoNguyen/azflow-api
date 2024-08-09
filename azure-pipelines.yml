@@ -42,20 +42,20 @@ stages:
           displayName: 'Download dependencies (and cache)'
 
         - script: |
-            go build -o azflow-api
+            go build -o $(Build.ArtifactStagingDirectory)/azflow-api
           displayName: 'Build Go Project'
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathToPublish: '$(Build.ArtifactStagingDirectory)/azflow-api'
+            artifactName: 'azflow-api'
+          displayName: 'Publish Go Binary'
 
         - task: Cache@2
           inputs:
             key: 'go | "$(Agent.OS)" | go.sum'
             path: $(GOPATH)/pkg/mod
           displayName: 'Save Go Modules Cache'
-
-        - task: PublishBuildArtifacts@1
-          inputs:
-            pathToPublish: 'azflow-api'
-            artifactName: 'azflow-api'
-          displayName: 'Publish Go Binary'
 
         - task: ArchiveFiles@2
           displayName: 'Archive files'
