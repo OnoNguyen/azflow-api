@@ -72,15 +72,13 @@ stages:
               steps:
                 - task: Kubernetes@1
                   inputs:
-                    connectionType: 'Azure Resource Manager'
-                    azureSubscriptionEndpoint: 'Visual Studio Premium with MSDN(05f2113e-370b-4489-ae25-7d9e721459fc)'
-                    azureResourceGroup: 'azflow_group'
-                    kubernetesCluster: 'azflow'
+                    connectionType: 'Kubernetes Service Connection'
+                    kubernetesServiceEndpoint: 'dev-azflowKS'
                     namespace: 'default'
                     command: 'apply'
                     useConfigurationFile: true
                     configuration: '$(Pipeline.Workspace)/deployment.yml'
                     secretType: 'dockerRegistry'
-                    containerRegistryType: 'Azure Container Registry'
-                    azureContainerRegistry: '$(acrName).azurecr.io'
+                    containerRegistryType: 'Container Registry'
+                    dockerRegistryEndpoint: 'dev-azflowACR'
                     secretName: 'acr-auth'
