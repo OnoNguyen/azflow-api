@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: azflow-api
-          image: azflow.azurecr.io/azflow-api:latest
+          image: devazflowcr.azurecr.io/azflow-api:latest
           ports:
             - containerPort: 8080
 ---
