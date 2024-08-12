@@ -77,7 +77,7 @@ stages:
                     namespace: 'default'
                     command: 'apply'
                     useConfigurationFile: true
-                    configuration: '$(Pipeline.Workspace)/deployment.yml'
+                    configuration: '$(Build.SourcesDirectory)/deployment.yml'
                     secretType: 'dockerRegistry'
                     containerRegistryType: 'Container Registry'
                     dockerRegistryEndpoint: 'dev-azflowACR'
