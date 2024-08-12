@@ -60,12 +60,12 @@ stages:
             buildContext: '$(Build.SourcesDirectory)'
             tags: '$(tag)'
 
+        - script: |
+            ls -al $(Build.SourcesDirectory)
+          displayName: 'List files in source directory'
+
   - stage: Deploy
     jobs:
-      - script: |
-          ls -al $(Build.SourcesDirectory)
-        displayName: 'List files in source directory'
-
       - deployment: Deploy
         environment: 'aks'
         pool:
