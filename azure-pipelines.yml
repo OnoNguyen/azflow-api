@@ -38,7 +38,7 @@ stages:
         - script: |
             go build -o $(Build.SourcesDirectory)/azflow-api
           displayName: 'Build Go Project'
-#
+
 #        - task: Cache@2
 #          inputs:
 #            key: 'go | "$(Agent.OS)" | go.sum | v1' # Update the key to force a fresh cache
