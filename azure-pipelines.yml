@@ -60,9 +60,11 @@ stages:
             buildContext: '$(Build.SourcesDirectory)'
             tags: '$(tag)'
 
-        - script: |
-            ls -al $(Build.SourcesDirectory)
-          displayName: 'List files in source directory'
+        - task: PublishPipelineArtifact@1
+          inputs:
+            targetPath: '$(Build.SourcesDirectory)/deployment.yml'
+            artifact: 'deployment-yml'
+          displayName: 'Publish deployment.yml'
 
   - stage: Deploy
     jobs:
@@ -74,6 +76,12 @@ stages:
           runOnce:
             deploy:
               steps:
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifactName: 'deployment-yml'
+                    targetPath: '$(Pipeline.Workspace)'
+                  displayName: 'Download deployment.yml'
+
                 - task: Kubernetes@1
                   inputs:
                     connectionType: 'Kubernetes Service Connection'
@@ -81,7 +89,7 @@ stages:
                     namespace: 'default'
                     command: 'apply'
                     useConfigurationFile: true
-                    configuration: '$(Build.SourcesDirectory)/deployment.yml'
+                    configuration: '$(Pipeline.Workspace)/deployment.yml'
                     secretType: 'dockerRegistry'
                     containerRegistryType: 'Container Registry'
                     dockerRegistryEndpoint: 'dev-azflowACR'
