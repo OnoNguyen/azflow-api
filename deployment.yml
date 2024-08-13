@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: azflow-api-deployment
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: azflow-api
@@ -15,6 +15,9 @@ spec:
       containers:
         - name: azflow-api
           image: devazflowcr.azurecr.io/azflow-api:latest
+          envFrom:
+            - secretRef:
+                name: azflow-api-env
           ports:
             - containerPort: 8080
 ---
