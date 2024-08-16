@@ -6,6 +6,7 @@ import (
 	"azflow-api/db"
 	"azflow-api/gql"
 	"azflow-api/openai"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -68,8 +69,23 @@ func main() {
 		},
 	})
 
-	r.Handle("/", playground.Handler("GraphQL playground", "/api"))
-	r.Handle("/api", srv)
+	// Redirect handler
+	r.HandleFunc("/s/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+		fmt.Println("id is", id)
+		fmt.Println("ShortURLs map contents:", gql.ShortURLs) // Debug print
+		if link, ok := gql.ShortURLs[id]; ok {
+			fmt.Println("Redirecting to:", link.LongURL) // Debug print
+			http.Redirect(w, r, link.LongURL, http.StatusFound)
+			return
+		}
+		fmt.Println("Short URL not found") // Debug print
+		http.NotFound(w, r)
+	})
+
+	r.Handle("/", playground.Handler("GraphQL playground", "/gql"))
+	r.Handle("/gql", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 

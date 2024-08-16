@@ -10,6 +10,9 @@ import (
 	"azflow-api/gql/model"
 	"azflow-api/openai"
 	"context"
+	"fmt"
+	"math/rand"
+	"time"
 )
 
 // SignUp is the resolver for the signUp field.
@@ -52,6 +55,22 @@ func (r *mutationResolver) CreateBookSummary(ctx context.Context, input *model.B
 	return story.CreateBookSummary(input.Title)
 }
 
+// CreateShortURL is the resolver for the createShortURL field.
+func (r *mutationResolver) CreateShortURL(ctx context.Context, longURL string) (*model.ShortURL, error) {
+	id := generateID()
+	shortURL := fmt.Sprintf("http://localhost:5173/s/%s", id)
+
+	shortLink := &model.ShortURL{
+		ID:       id,
+		LongURL:  longURL,
+		ShortURL: shortURL,
+	}
+
+	ShortURLs[id] = shortLink
+
+	return shortLink, nil
+}
+
 // TrackURL is the resolver for the trackUrl field.
 func (r *queryResolver) TrackURL(ctx context.Context) (string, error) {
 	return openai.GetTrack(), nil
@@ -80,6 +99,24 @@ func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
 	return audios, nil
 }
 
+// GetShortURL is the resolver for the getShortURL field.
+func (r *queryResolver) GetShortURL(ctx context.Context, id string) (*model.ShortURL, error) {
+	if link, ok := ShortURLs[id]; ok {
+		return link, nil
+	}
+	return nil, fmt.Errorf("short link not found")
+}
+
+// GetLongURL is the resolver for the getLongURL field.
+func (r *queryResolver) GetLongURL(ctx context.Context, shortURL string) (string, error) {
+	for _, link := range ShortURLs {
+		if link.ShortURL == shortURL {
+			return link.LongURL, nil
+		}
+	}
+	return "", fmt.Errorf("URL not found")
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -88,3 +125,15 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+func generateID() string {
+	rand.Seed(time.Now().UnixNano())
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	b := make([]rune, 8)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+var ShortURLs = make(map[string]*model.ShortURL)

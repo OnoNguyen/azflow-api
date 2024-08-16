@@ -24,9 +24,17 @@ type Audio {
   id: Int!
 }
 
+type ShortURL {
+  id: ID!
+  longURL: String!
+  shortURL: String!
+}
+
 type Query {
   trackUrl: String!
   getAudios: [Audio!]!
+  getShortURL(id: ID!): ShortURL
+  getLongURL(shortURL: String!): String!
 }
 
 type Mutation {
@@ -34,4 +42,5 @@ type Mutation {
   createAudio(input: AudioInput!): String!
   editAudio(input: EditAudioInput!): String!
   createBookSummary(input: BookInput): String!
+  createShortURL(longURL: String!): ShortURL!
 }

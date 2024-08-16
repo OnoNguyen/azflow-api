@@ -29,6 +29,12 @@ type Mutation struct {
 type Query struct {
 }
 
+type ShortURL struct {
+	ID       string `json:"id"`
+	LongURL  string `json:"longURL"`
+	ShortURL string `json:"shortURL"`
+}
+
 type SignupInput struct {
 	ExtID string `json:"extId"`
 	Email string `json:"email"`
