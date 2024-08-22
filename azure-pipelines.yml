@@ -66,31 +66,31 @@ stages:
             artifact: 'deployment-yml'
           displayName: 'Publish deployment.yml'
 
-  - stage: Deploy
-    jobs:
-      - deployment: Deploy
-        environment: 'aks'
-        pool:
-          vmImage: 'ubuntu-latest'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    artifactName: 'deployment-yml'
-                    targetPath: '$(Pipeline.Workspace)'
-                  displayName: 'Download deployment.yml'
-
-                - task: Kubernetes@1
-                  inputs:
-                    connectionType: 'Kubernetes Service Connection'
-                    kubernetesServiceEndpoint: 'dev-azflowKS'
-                    namespace: 'default'
-                    command: 'apply'
-                    useConfigurationFile: true
-                    configuration: '$(Pipeline.Workspace)/deployment.yml'
-                    secretType: 'dockerRegistry'
-                    containerRegistryType: 'Container Registry'
-                    dockerRegistryEndpoint: 'azflowcrmvp'
-                    secretName: 'acr-auth'
+#  - stage: Deploy
+#    jobs:
+#      - deployment: Deploy
+#        environment: 'aks'
+#        pool:
+#          vmImage: 'ubuntu-latest'
+#        strategy:
+#          runOnce:
+#            deploy:
+#              steps:
+#                - task: DownloadPipelineArtifact@2
+#                  inputs:
+#                    artifactName: 'deployment-yml'
+#                    targetPath: '$(Pipeline.Workspace)'
+#                  displayName: 'Download deployment.yml'
+#
+#                - task: Kubernetes@1
+#                  inputs:
+#                    connectionType: 'Kubernetes Service Connection'
+#                    kubernetesServiceEndpoint: 'dev-azflowKS'
+#                    namespace: 'default'
+#                    command: 'apply'
+#                    useConfigurationFile: true
+#                    configuration: '$(Pipeline.Workspace)/deployment.yml'
+#                    secretType: 'dockerRegistry'
+#                    containerRegistryType: 'Container Registry'
+#                    dockerRegistryEndpoint: 'azflowcrmvp'
+#                    secretName: 'acr-auth'
