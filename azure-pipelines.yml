@@ -53,8 +53,8 @@ stages:
 
         - task: Docker@2
           inputs:
-            containerRegistry: 'dev-azflowACR'
-            repository: 'devazflowcr.azurecr.io/azflow-api'
+            containerRegistry: 'azflowcrmvp'
+            repository: 'azflowcr.azurecr.io/azflow-api'
             command: 'buildAndPush'
             Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
             buildContext: '$(Build.SourcesDirectory)'
