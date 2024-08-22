@@ -36,7 +36,7 @@ stages:
           displayName: 'Download dependencies (and cache)'
 
         - script: |
-            go build -o $(Build.SourcesDirectory)/azflow-api
+            GOOS=linux GOARCH=amd64 go build -o $(Build.SourcesDirectory)/azflow-api
           displayName: 'Build Go Project'
 
 #        - task: Cache@2

@@ -30,3 +30,10 @@ To enable SSL for FE:
 sudo apt-get update
 sudo apt-get install certbot python3-certbot-nginx
 sudo certbot --nginx -d azflow.australiasoutheast.cloudapp.azure.com
+```
+
+To login and pull docker container from azure container registry:
+```
+sudo docker login azflowcr.azurecr.io
+sudo docker pull azflowcr.azurecr.io/azflow-api:latest
+```
