@@ -35,5 +35,7 @@ sudo certbot --nginx -d azflow.australiasoutheast.cloudapp.azure.com
 To login and pull docker container from azure container registry:
 ```
 sudo docker login azflowcr.azurecr.io
-sudo docker pull azflowcr.azurecr.io/azflow-api:latest
+sudo docker pull azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:130
+# run an interactive cli in the docker image
+sudo docker run -it --entrypoint /bin/sh azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:130
 ```

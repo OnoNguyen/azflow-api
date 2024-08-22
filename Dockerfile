@@ -1,5 +1,5 @@
 # final stage
-FROM alpine:latest
+FROM --platform=linux/arm64 alpine:latest
 
 WORKDIR /root/
 
