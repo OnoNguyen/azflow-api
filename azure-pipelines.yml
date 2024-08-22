@@ -92,5 +92,5 @@ stages:
                     configuration: '$(Pipeline.Workspace)/deployment.yml'
                     secretType: 'dockerRegistry'
                     containerRegistryType: 'Container Registry'
-                    dockerRegistryEndpoint: 'dev-azflowACR'
+                    dockerRegistryEndpoint: 'azflowcrmvp'
                     secretName: 'acr-auth'
