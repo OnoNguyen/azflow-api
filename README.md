@@ -38,4 +38,6 @@ sudo docker login azflowcr.azurecr.io
 sudo docker pull azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:130
 # run an interactive cli in the docker image
 sudo docker run -it --entrypoint /bin/sh azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:130
+# copy file from running container
+sudo docker cp 8c863a46712d:/root/azflow-api ./azflow-api
 ```
