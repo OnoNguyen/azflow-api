@@ -5,6 +5,7 @@ WORKDIR /root/
 
 # Copy the pre-built binary from the pipeline workspace
 COPY azflow-api .
+COPY .env .
 
 EXPOSE 8080
 
