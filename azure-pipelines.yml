@@ -58,7 +58,7 @@ stages:
             command: 'buildAndPush'
             Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
             buildContext: '$(Build.SourcesDirectory)'
-          tags: 'latest,$(Build.BuildId)'
+            tags: 'latest,$(Build.BuildId)'
 
         - task: PublishPipelineArtifact@1
           inputs:
