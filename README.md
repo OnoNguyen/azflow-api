@@ -14,7 +14,7 @@ Tech stacks:
   - pull docker postgres `docker pull postgres` and start the instance
   - create an empty Postgres db using pgAdmin or CLI, e.g:
     ```
-    sudo docker exec -it 03bbe2ac7448 bash
+    sudo docker exec -it azflow-db bash
     root@03bbe2ac7448:/# psql -U postgres
     postgres=# create database azflowcore;
 
