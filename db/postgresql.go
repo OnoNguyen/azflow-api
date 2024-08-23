@@ -30,7 +30,7 @@ func CloseDB() error {
 }
 
 func Migrate() {
-	driverURL := "postgres://postgres:abcd1234@localhost:5432/azflowcore?sslmode=disable"
+	driverURL := "postgres://postgres:abcd1234@azflow-db:5432/azflowcore?sslmode=disable"
 	m, err := migrate.New("file://db/migration", driverURL)
 	if err != nil {
 		panic(err)
