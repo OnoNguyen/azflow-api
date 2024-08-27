@@ -17,6 +17,12 @@ Tech stacks:
     sudo docker exec -it azflow-db bash
     root@03bbe2ac7448:/# psql -U postgres
     postgres=# create database azflowcore;
+    create user azflow_admin with password 'abcd1234';
+    alter database azflowcore owner to azflow_admin;
+    # to list all dbs:
+    \l
+    # to list all users:
+    \du
 
   - and put its credentials into a local copy of `.template.env` so the app can pickup and seed it. 
     - e.g: `docker run --name azflow-db -e POSTGRES_PASSWORD=abcd1234 -d -p 5432:5432 postgres`
