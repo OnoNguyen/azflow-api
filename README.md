@@ -54,4 +54,11 @@ Useful debug commands:
 azureuser@azflowmvp:~$ sudo docker run --rm --network azflow-network -it postgres psql "user=azflow-admin dbname=azflowcore password=abcd1234 host=azflow-db port=5432 sslmode=disable"
 # to see what ip range and port the api is listening to:
 azureuser@azflowmvp:~$ docker exec -it azflow-api /bin/sh
+~ # netstat -tuln | grep 8080
+#
+docker restart azflow-api
+docker stop azflow-api
+docker rm azflow-api
+
+
 ```

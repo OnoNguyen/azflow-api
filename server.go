@@ -33,6 +33,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	apiRouter := r.PathPrefix("/api").Subrouter()
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -70,7 +71,7 @@ func main() {
 	})
 
 	// Redirect handler
-	r.HandleFunc("/s/{id}", func(w http.ResponseWriter, r *http.Request) {
+	apiRouter.HandleFunc("/s/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]
 		fmt.Println("id is", id)
@@ -84,8 +85,8 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-	r.Handle("/", playground.Handler("GraphQL playground", "/gql"))
-	r.Handle("/gql", srv)
+	apiRouter.Handle("/", playground.Handler("GraphQL playground", "/gql"))
+	apiRouter.Handle("/gql", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 
