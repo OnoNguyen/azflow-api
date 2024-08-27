@@ -47,3 +47,11 @@ sudo docker run -it --entrypoint /bin/sh azflowcr.azurecr.io/azflowcr.azurecr.io
 # copy file from running container
 sudo docker cp 8c863a46712d:/root/azflow-api ./azflow-api
 ```
+
+
+Useful debug commands:
+```
+azureuser@azflowmvp:~$ sudo docker run --rm --network azflow-network -it postgres psql "user=azflow-admin dbname=azflowcore password=abcd1234 host=azflow-db port=5432 sslmode=disable"
+# to see what ip range and port the api is listening to:
+azureuser@azflowmvp:~$ docker exec -it azflow-api /bin/sh
+```

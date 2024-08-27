@@ -89,5 +89,5 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 
-	log.Fatal(http.ListenAndServe("localhost:"+port, r))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, r))
 }
