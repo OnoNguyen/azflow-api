@@ -18,6 +18,7 @@ Tech stacks:
     root@03bbe2ac7448:/# psql -U postgres
     postgres=# create database azflowcore;
     create user azflow_admin with password 'abcd1234';
+    alter role azflow_admin with superuser;
     alter database azflowcore owner to azflow_admin;
     # to list all dbs:
     \l
