@@ -85,7 +85,7 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-	apiRouter.Handle("/", playground.Handler("GraphQL playground", "/api/gql"))
+	apiRouter.Handle("/", playground.Handler("GraphQL playground", "/gql"))
 	apiRouter.Handle("/gql", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
