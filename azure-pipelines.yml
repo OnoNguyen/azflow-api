@@ -45,11 +45,11 @@ stages:
 #            path: $(GOPATH)/pkg/mod
 #          displayName: 'Save Go Modules Cache'
 
-        - task: ArchiveFiles@2
-          displayName: 'Archive files'
-          inputs:
-            rootFolderOrFile: '$(Build.Repository.LocalPath)'
-            includeRootFolder: False
+#        - task: ArchiveFiles@2
+#          displayName: 'Archive files'
+#          inputs:
+#            rootFolderOrFile: '$(Build.Repository.LocalPath)'
+#            includeRootFolder: False
 
         - task: Docker@2
           inputs:
@@ -60,11 +60,16 @@ stages:
             buildContext: '$(Build.SourcesDirectory)'
             tags: 'latest,$(Build.BuildId)'
 
-        - task: PublishPipelineArtifact@1
-          inputs:
-            targetPath: '$(Build.SourcesDirectory)/deployment.yml'
-            artifact: 'deployment-yml'
-          displayName: 'Publish deployment.yml'
+        - script: |
+            ssh -i $(Build.SourcesDirectory)/azflowmvp_key.pem azureuser@20.11.243.20
+            docker pull azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:latest
+          displayName: 'SSH and pull image'
+
+#        - task: PublishPipelineArtifact@1
+#          inputs:
+#            targetPath: '$(Build.SourcesDirectory)/deployment.yml'
+#            artifact: 'deployment-yml'
+#          displayName: 'Publish deployment.yml'
 
 #  - stage: Deploy
 #    jobs:
