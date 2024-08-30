@@ -58,7 +58,7 @@ func (r *mutationResolver) CreateBookSummary(ctx context.Context, input *model.B
 // CreateShortURL is the resolver for the createShortURL field.
 func (r *mutationResolver) CreateShortURL(ctx context.Context, longURL string) (*model.ShortURL, error) {
 	id := generateID()
-	shortURL := fmt.Sprintf("https://azflow.australiasoutheast.cloudapp.azure.com/s/%s", id)
+	shortURL := fmt.Sprintf("https://azflow.io/s/%s", id)
 
 	shortLink := &model.ShortURL{
 		ID:       id,
