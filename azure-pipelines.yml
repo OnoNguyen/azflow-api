@@ -65,7 +65,7 @@ stages:
             ssh-keyscan -H 20.11.243.20 >> ~/.ssh/known_hosts
             chmod 600 $(Build.SourcesDirectory)/azflowmvp_key.pem
             ssh -i $(Build.SourcesDirectory)/azflowmvp_key.pem azureuser@20.11.243.20<< 'EOF'
-              docker pull azflowcr.azurecr.io/azflow-api:latest
+              docker pull azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:latest
               docker stop azflow-api
               docker rm azflow-api
               docker run -d --name azflow-api --network azflow-network -p 8080:8080 azflowcr.azurecr.io/azflowcr.azurecr.io/azflow-api:latest
