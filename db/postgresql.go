@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -11,10 +12,24 @@ import (
 	"os"
 )
 
-var Conn *pgx.Conn
+var (
+	Conn       *pgx.Conn
+	dbUser     string
+	dbPassword string
+	dbName     string
+	dbHost     string
+	dbPort     string
+)
 
 func Init() {
-	connStr := os.Getenv("DATABASE_URL")
+	dbUser = os.Getenv("DB_USER")
+	dbPassword = os.Getenv("DB_PASSWORD")
+	dbName = os.Getenv("DB_NAME")
+	dbHost = os.Getenv("DB_HOST")
+	dbPort = os.Getenv("DB_PORT")
+
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", dbUser, dbPassword, dbName, dbHost, dbPort)
+
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {
 		panic(err)
@@ -30,7 +45,7 @@ func CloseDB() error {
 }
 
 func Migrate() {
-	driverURL := "postgres://postgres:abcd1234@azflow-db:5432/azflowcore?sslmode=disable"
+	driverURL := fmt.Sprintf("postgres://postgres:%s@%s:%s/%s?sslmode=disable", dbPassword, dbHost, dbPort, dbName)
 	m, err := migrate.New("file://db/migration", driverURL)
 	if err != nil {
 		panic(err)
