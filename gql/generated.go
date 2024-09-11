@@ -79,7 +79,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	SignUp(ctx context.Context, input *model.SignupInput) (int, error)
 	CreateAudio(ctx context.Context, input model.AudioInput) (string, error)
-	EditAudio(ctx context.Context, input model.EditAudioInput) (string, error)
+	EditAudio(ctx context.Context, input model.EditAudioInput) (*model.Audio, error)
 	CreateBookSummary(ctx context.Context, input *model.BookInput) (string, error)
 	CreateShortURL(ctx context.Context, longURL string) (*model.ShortURL, error)
 }
@@ -811,9 +811,9 @@ func (ec *executionContext) _Mutation_editAudio(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.Audio)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAudio2ᚖazflowᚑapiᚋgqlᚋmodelᚐAudio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_editAudio(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -823,7 +823,15 @@ func (ec *executionContext) fieldContext_Mutation_editAudio(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_Audio_url(ctx, field)
+			case "title":
+				return ec.fieldContext_Audio_title(ctx, field)
+			case "id":
+				return ec.fieldContext_Audio_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Audio", field.Name)
 		},
 	}
 	defer func() {
@@ -4056,6 +4064,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNAudio2azflowᚑapiᚋgqlᚋmodelᚐAudio(ctx context.Context, sel ast.SelectionSet, v model.Audio) graphql.Marshaler {
+	return ec._Audio(ctx, sel, &v)
+}
 
 func (ec *executionContext) marshalNAudio2ᚕᚖazflowᚑapiᚋgqlᚋmodelᚐAudioᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Audio) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))

@@ -3,6 +3,7 @@ package story
 import (
 	"azflow-api/azure/storage"
 	"azflow-api/db"
+	"azflow-api/gql/model"
 	"azflow-api/openai"
 	"context"
 	"fmt"
@@ -92,27 +93,54 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 
 	openai.Tts(text, voice, outFile)
 
-	azureFilePath := fmt.Sprintf("%s/%s", memberEmail, fileName)
-	fmt.Println("Uploading MP3 file to Azure Blob Storage...", azureFilePath)
+	azureAudioFilePath := fmt.Sprintf("%s/%s", memberEmail, fileName)
+	azureCaptionFilePath := azureAudioFilePath + ".txt"
 
-	err := storage.UploadFile(ContainerName, azureFilePath, filePath)
+	fmt.Println("Uploading MP3 file to Azure Blob Storage...", azureAudioFilePath)
+	err := storage.UploadFile(ContainerName, azureAudioFilePath, filePath)
 	if err != nil {
 		return "", err
 	}
 
-	// note: audioExtId is azureFilePath
-	_, err = insertAudio(memberEmail, memberExtId, azureFilePath, fileName, title)
+	fmt.Println("Uploading caption file to Azure Blob Storage...", azureCaptionFilePath)
+	// Create a temporary file for the caption
+	captionFile, err := os.CreateTemp("", "caption-*.txt")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temporary caption file: %w", err)
+	}
+	defer os.Remove(captionFile.Name()) // Clean up the temporary file when done
+
+	// Write the text content to the temporary file
+	_, err = captionFile.WriteString(text)
+	if err != nil {
+		return "", fmt.Errorf("failed to write caption to temporary file: %w", err)
+	}
+	captionFile.Close() // Close the file to ensure all data is written
+
+	// Upload the caption file to Azure Blob Storage
+	err = storage.UploadFile(ContainerName, azureCaptionFilePath, captionFile.Name())
+	if err != nil {
+		return "", fmt.Errorf("failed to upload caption file: %w", err)
+	}
+
+	// note: audioExtId is azureAudioFilePath
+	_, err = insertAudio(memberEmail, memberExtId, azureAudioFilePath, fileName, title)
 	if err != nil {
 		return "", err
 	}
 
-	return azureFilePath, nil
+	return azureAudioFilePath, nil
 }
 
 // EditAudio edits audio title
-func EditAudio(id int, title string) (string, error) {
-	c, err := db.Conn.Exec(context.Background(), "UPDATE audio SET title = $1 WHERE id = $2", title, id)
-	return c.String(), err
+func EditAudio(id int, title string) (*model.Audio, error) {
+
+	var (
+		a model.Audio
+	)
+
+	err := pgxscan.Get(context.Background(), db.Conn, &a, "UPDATE audio SET title = $1 WHERE id = $2 RETURNING id, title", title, id)
+	return &a, err
 }
 
 // insertAudio inserts audio info into the database

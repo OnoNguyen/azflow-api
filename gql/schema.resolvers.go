@@ -37,10 +37,10 @@ func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInp
 }
 
 // EditAudio is the resolver for the editAudio field.
-func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioInput) (string, error) {
+func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioInput) (*model.Audio, error) {
 	_, err := auth.GetMember(ctx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return story.EditAudio(input.ID, input.Title)
