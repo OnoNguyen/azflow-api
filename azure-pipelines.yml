@@ -20,8 +20,8 @@ stages:
         steps:
         - task: GoTool@0
           inputs:
-            version: '1.20'
-          displayName: 'Use Go 1.20'
+            version: '1.23'
+          displayName: 'Use Go 1.23'
         
         - task: Cache@2
           inputs:
