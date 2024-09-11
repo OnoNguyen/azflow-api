@@ -78,7 +78,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SignUp(ctx context.Context, input *model.SignupInput) (int, error)
-	CreateAudio(ctx context.Context, input model.AudioInput) (string, error)
+	CreateAudio(ctx context.Context, input model.AudioInput) (*model.Audio, error)
 	EditAudio(ctx context.Context, input model.EditAudioInput) (*model.Audio, error)
 	CreateBookSummary(ctx context.Context, input *model.BookInput) (string, error)
 	CreateShortURL(ctx context.Context, longURL string) (*model.ShortURL, error)
@@ -756,9 +756,9 @@ func (ec *executionContext) _Mutation_createAudio(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.Audio)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAudio2ᚖazflowᚑapiᚋgqlᚋmodelᚐAudio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createAudio(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -768,7 +768,15 @@ func (ec *executionContext) fieldContext_Mutation_createAudio(ctx context.Contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_Audio_url(ctx, field)
+			case "title":
+				return ec.fieldContext_Audio_title(ctx, field)
+			case "id":
+				return ec.fieldContext_Audio_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Audio", field.Name)
 		},
 	}
 	defer func() {

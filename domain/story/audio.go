@@ -76,15 +76,15 @@ func getInfoFromDB(names []string) ([]*TAudioInfo, error) {
 }
 
 // CreateAudio does openai tts, upload file, persist do db, and return path
-func CreateAudio(memberEmail string, memberExtId string, text string, voice string, title string) (string, error) {
+func CreateAudio(memberEmail string, memberExtId string, text string, voice string, title string) (*model.Audio, error) {
 	MinTextLength := 800
 	MaxTextLength := 4000
 	l := len(text)
 	if l < MinTextLength {
-		return "", fmt.Errorf("content too short (%d < %d)", l, MinTextLength)
+		return nil, fmt.Errorf("content too short (%d < %d)", l, MinTextLength)
 	}
 	if l > MaxTextLength {
-		return "", fmt.Errorf("content too long (%d > %d)", l, MaxTextLength)
+		return nil, fmt.Errorf("content too long (%d > %d)", l, MaxTextLength)
 	}
 
 	fileName, filePath, outFile := createFile()
@@ -99,52 +99,45 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 	fmt.Println("Uploading MP3 file to Azure Blob Storage...", azureAudioFilePath)
 	err := storage.UploadFile(ContainerName, azureAudioFilePath, filePath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	fmt.Println("Uploading caption file to Azure Blob Storage...", azureCaptionFilePath)
 	// Create a temporary file for the caption
 	captionFile, err := os.CreateTemp("", "caption-*.txt")
 	if err != nil {
-		return "", fmt.Errorf("failed to create temporary caption file: %w", err)
+		return nil, fmt.Errorf("failed to create temporary caption file: %w", err)
 	}
 	defer os.Remove(captionFile.Name()) // Clean up the temporary file when done
 
 	// Write the text content to the temporary file
 	_, err = captionFile.WriteString(text)
 	if err != nil {
-		return "", fmt.Errorf("failed to write caption to temporary file: %w", err)
+		return nil, fmt.Errorf("failed to write caption to temporary file: %w", err)
 	}
 	captionFile.Close() // Close the file to ensure all data is written
 
 	// Upload the caption file to Azure Blob Storage
 	err = storage.UploadFile(ContainerName, azureCaptionFilePath, captionFile.Name())
 	if err != nil {
-		return "", fmt.Errorf("failed to upload caption file: %w", err)
+		return nil, fmt.Errorf("failed to upload caption file: %w", err)
 	}
 
 	// note: audioExtId is azureAudioFilePath
-	_, err = insertAudio(memberEmail, memberExtId, azureAudioFilePath, fileName, title)
-	if err != nil {
-		return "", err
-	}
-
-	return azureAudioFilePath, nil
+	return insertAudio(memberEmail, memberExtId, azureAudioFilePath, fileName, title)
 }
 
 // EditAudio edits audio title
 func EditAudio(id int, title string) (*model.Audio, error) {
 
-	var (
-		a model.Audio
-	)
+	var a model.Audio
 
 	err := pgxscan.Get(context.Background(), db.Conn, &a, "UPDATE audio SET title = $1 WHERE id = $2 RETURNING id, title", title, id)
 	return &a, err
 }
 
 // insertAudio inserts audio info into the database
-func insertAudio(memberEmail string, memberExtId string, audioExtId string, fileName string, title string) (int, error) {
+func insertAudio(memberEmail string, memberExtId string, audioExtId string, fileName string, title string) (*model.Audio, error) {
 	ctx := context.Background()
 
 	query := `
@@ -163,15 +156,12 @@ func insertAudio(memberEmail string, memberExtId string, audioExtId string, file
 	)
 	INSERT INTO audio (member_id, ext_id, file_name, title)
 	VALUES ((SELECT id FROM member_data), $3, $4, $5)
-	RETURNING id;
+	RETURNING id, title;
 	`
 
-	var audioID int
-	err := pgxscan.Get(ctx, db.Conn, &audioID, query, memberEmail, memberExtId, audioExtId, fileName, title)
-	if err != nil {
-		return 0, fmt.Errorf("failed to insert audio info: %w", err)
-	}
-	return audioID, nil
+	var a model.Audio
+	err := pgxscan.Get(ctx, db.Conn, &a, query, memberEmail, memberExtId, audioExtId, fileName, title)
+	return &a, err
 }
 
 // createFile creates a temporary file

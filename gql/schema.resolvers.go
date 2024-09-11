@@ -27,10 +27,10 @@ func (r *mutationResolver) SignUp(ctx context.Context, input *model.SignupInput)
 }
 
 // CreateAudio is the resolver for the createAudio field.
-func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInput) (string, error) {
+func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInput) (*model.Audio, error) {
 	member, err := auth.GetMember(ctx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return story.CreateAudio(member.Email, member.ExtId, input.Text, input.Voice, input.Title)
