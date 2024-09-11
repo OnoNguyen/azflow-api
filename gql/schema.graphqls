@@ -32,10 +32,7 @@ type ShortURL {
 
 type Query {
   trackUrl: String!
-  # get all audios without filtering
   getAudios: [Audio!]!
-  # get audios for an authenticated member
-  getAudiosForMember: [Audio!]!
   getShortURL(id: ID!): ShortURL
   getLongURL(shortURL: String!): String!
 }

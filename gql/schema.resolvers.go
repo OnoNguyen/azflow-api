@@ -78,30 +78,13 @@ func (r *queryResolver) TrackURL(ctx context.Context) (string, error) {
 
 // GetAudios is the resolver for the getAudios field.
 func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
-	as, err := story.GetAudios("")
-
-	if err != nil {
-		return nil, err
-	}
-
-	audios := make([]*model.Audio, 0, len(as))
-	for _, a := range as {
-		b := model.Audio{Title: a.Name, URL: a.Url, ID: a.Id}
-		audios = append(audios, &b)
-	}
-
-	return audios, nil
-}
-
-// GetAudiosForMember is the resolver for the getAudiosForMember field.
-func (r *queryResolver) GetAudiosForMember(ctx context.Context) ([]*model.Audio, error) {
 	member, _ := auth.GetMember(ctx)
-
-	if member == nil {
-		return nil, fmt.Errorf("unauthenticated")
+	email := ""
+	if member != nil {
+		email = member.Email
 	}
 
-	as, err := story.GetAudios(member.Email)
+	as, err := story.GetAudios(email)
 
 	if err != nil {
 		return nil, err
@@ -143,12 +126,6 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func generateID() string {
 	rand.Seed(time.Now().UnixNano())
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")

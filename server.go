@@ -27,8 +27,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	host := os.Getenv("API_HOST")
-	port := os.Getenv("API_PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
@@ -88,7 +87,7 @@ func main() {
 	r.Handle("/", playground.Handler("GraphQL playground", "/gql"))
 	r.Handle("/gql", srv)
 
-	log.Printf("Connect to http://%s:%s/ for GraphQL playground", host, port)
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 
-	log.Fatal(http.ListenAndServe(host+":"+port, r))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, r))
 }
