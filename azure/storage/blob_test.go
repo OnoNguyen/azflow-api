@@ -1,23 +1,22 @@
 package storage
 
 import (
-	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/joho/godotenv"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"testing"
 )
 
 func initTest() {
-	// Mocked values for testing
-	AccountName = "azflowresources"
-	AccountKey = "3SF5rYTQYdcHrXJpPEODMwGj/dfPWzI5Dimwr2KmHUVhxUVxm+NGY049xFMsT9e64wM3KwAXcKWl+AStp9BCXw=="
-	credential, err := azblob.NewSharedKeyCredential(AccountName, AccountKey)
+	// init db connection
+	err := godotenv.Load("../../.env")
 	if err != nil {
-		panic(err)
+		log.Fatal("Error loading .env file")
 	}
-	Credential = credential
-	Pipeline = azblob.NewPipeline(Credential, azblob.PipelineOptions{})
+
+	Init()
 }
 
 func TestUploadFile(t *testing.T) {
@@ -77,7 +76,7 @@ func TestGetFileUrls(t *testing.T) {
 
 	// Mocked container name for testing
 	containerName := "audio"
-	path := "1a0b3b6f-52c6-4039-afca-d7f93f9ff963"
+	path := "nguyenono@gmail.com"
 
 	// Run the function under test
 	urls, err := GetFileInfos(containerName, path)
@@ -102,5 +101,36 @@ func TestGetFileUrls(t *testing.T) {
 		if parsedURL.Query().Get("se") == "" {
 			t.Error("Expected SAS token 'se' parameter, got empty")
 		}
+	}
+}
+
+func TestGetFileUrl(t *testing.T) {
+	initTest()
+
+	// Mocked container name for testing
+	containerName := "audio"
+	path := "nguyenono@gmail.com/20240909-184227.mp3.txt"
+
+	// Run the function under test
+	u, err := GetFileInfo(containerName, path)
+
+	// Check for errors
+	if err != nil {
+		t.Fatalf("GetFileInfos failed: %v", err)
+	}
+
+	t.Log(u)
+
+	// Verify each URL format
+	parsedURL, err := url.Parse(u.Url)
+	if err != nil {
+		t.Errorf("Failed to parse URL %s: %v", u, err)
+		return
+	}
+	if parsedURL.Scheme != "https" {
+		t.Errorf("Expected URL scheme to be 'https', got '%s'", parsedURL.Scheme)
+	}
+	if parsedURL.Query().Get("se") == "" {
+		t.Error("Expected SAS token 'se' parameter, got empty")
 	}
 }

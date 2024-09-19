@@ -18,19 +18,46 @@ var (
 	ContainerName = "audio"
 )
 
-// GetAudios gets the urls to all audio files for a user if userEmail has value
-// otherwise gets the urls to all audio files
-func GetAudios(userEmail string) ([]*TAudio, error) {
-	fis, err := storage.GetFileInfos(ContainerName, userEmail)
+func GetAudio(id int) (*DmAudio, error) {
+	var path *string
+	err := pgxscan.Get(context.Background(), db.Conn, &path, "SELECT ext_id FROM audio WHERE id = $1", id)
+	if err != nil {
+		return nil, err
+	}
+
+	audio, err1 := GetAudios(*path)
+
+	if err1 != nil {
+		return nil, err1
+	}
+
+	if len(audio) == 0 {
+		return nil, fmt.Errorf("audio not found")
+	}
+
+	if len(audio) > 1 {
+		return nil, fmt.Errorf("more than one audio found")
+	}
+
+	return audio[0], nil
+
+}
+
+// GetAudios retrieves audio files from Azure Storage
+// and returns them as DmAudio objects.
+// path can be an empty string to retrieve all audio files
+// or it can be a path to a specific folder or file
+func GetAudios(path string) ([]*DmAudio, error) {
+	fis, err := storage.GetFileInfos(ContainerName, path)
 	if err != nil {
 		return nil, err
 	}
 
 	names := make([]string, 0, len(fis))
-	urls := make(map[string]string, len(fis))
+	urlMap := make(map[string]string, len(fis))
 	for _, fi := range fis {
 		names = append(names, fi.Name)
-		urls[fi.Name] = fi.Url
+		urlMap[fi.Name] = fi.Url
 	}
 
 	infos, err1 := getInfoFromDB(names)
@@ -38,16 +65,18 @@ func GetAudios(userEmail string) ([]*TAudio, error) {
 		return nil, err1
 	}
 
-	var audios []*TAudio
+	var audios []*DmAudio
 	for _, info := range infos {
-		name := info.Title
-		if name == "" {
-			name = info.Name
+		title := info.FileName
+		if title == "" {
+			title = info.Title
 		}
-		audios = append(audios, &TAudio{
-			Url:  urls[info.Name],
-			Name: name,
-			Id:   info.Id,
+
+		audios = append(audios, &DmAudio{
+			Url:        urlMap[info.ExtId],
+			CaptionUrl: urlMap[info.ExtId+".txt"],
+			Title:      title,
+			Id:         info.Id,
 		})
 	}
 
@@ -57,17 +86,17 @@ func GetAudios(userEmail string) ([]*TAudio, error) {
 // getInfoFromDB gets a list of audio info from db via CTE,
 // where input is names array,
 // and output is a list of matching titles and ids
-func getInfoFromDB(names []string) ([]*TAudioInfo, error) {
+func getInfoFromDB(names []string) ([]*PgAudio, error) {
 	query := `
         WITH name_cte AS (
-            SELECT unnest($1::text[]) AS name
+            SELECT unnest($1::text[]) AS ext_id
         )
-        SELECT n.name, COALESCE(a.title, '') AS title, COALESCE(a.id, -1) AS id 
+        SELECT n.ext_id, COALESCE(a.title, '') AS title, COALESCE(a.id, -1) AS id 
         FROM name_cte n
-        JOIN audio a ON n.name = a.ext_id;
+        JOIN audio a ON n.ext_id = a.ext_id;
     `
 
-	var audios []*TAudioInfo
+	var audios []*PgAudio
 	err := pgxscan.Select(context.Background(), db.Conn, &audios, query, pq.Array(names))
 	if err != nil {
 		return nil, err
@@ -89,7 +118,7 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 
 	fileName, filePath, outFile := createFile()
 	defer outFile.Close()
-	// defer os.Remove(outFile.Name())
+	// defer os.Remove(outFile.Title())
 
 	openai.Tts(text, voice, outFile)
 
@@ -128,12 +157,23 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 }
 
 // EditAudio edits audio title
-func EditAudio(id int, title string) (*model.Audio, error) {
+func EditAudio(id int, title string, caption string) (*model.Audio, error) {
 
-	var a model.Audio
+	var audioInfo PgAudio
+	err := pgxscan.Get(context.Background(), db.Conn, &audioInfo, "UPDATE audio SET title = $1 WHERE id = $2 RETURNING id, title, ext_id as extId", title, id)
 
-	err := pgxscan.Get(context.Background(), db.Conn, &a, "UPDATE audio SET title = $1 WHERE id = $2 RETURNING id, title", title, id)
-	return &a, err
+	if err != nil {
+		return nil, err
+	}
+
+	azureCaptionFilePath := fmt.Sprintf("%s.txt", audioInfo.ExtId)
+	err = storage.UploadFile(ContainerName, azureCaptionFilePath, caption)
+	if err != nil {
+		return nil, err
+	}
+
+	audio := model.Audio{Title: audioInfo.Title, ID: audioInfo.Id}
+	return &audio, err
 }
 
 // insertAudio inserts audio info into the database

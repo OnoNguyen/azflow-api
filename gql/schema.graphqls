@@ -7,6 +7,7 @@ input AudioInput {
 input EditAudioInput {
   id: Int!
   title: String!
+  caption: String!
 }
 
 input SignupInput {
@@ -20,6 +21,7 @@ input BookInput {
 
 type Audio {
   url: String!
+  captionUrl: String!
   title: String!
   id: Int!
 }
@@ -34,6 +36,7 @@ type Query {
   trackUrl: String!
   # get all audios without filtering
   getAudios: [Audio!]!
+  getAudio(id: Int): Audio!
   # get audios for an authenticated member
   getAudiosForMember: [Audio!]!
   getShortURL(id: ID!): ShortURL

@@ -79,11 +79,26 @@ func UploadFile(containerName, blobName, filePath string) error {
 	return nil
 }
 
-// GetFileInfos gets URL, Name to all blobs in the specified container
+func GetFileInfo(containerName, path string) (*AzFileInfo, error) {
+	infos, err := GetFileInfos(containerName, path)
+	if err != nil {
+		return nil, err
+	}
+	if len(infos) == 0 {
+		return nil, fmt.Errorf("no blob found")
+	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("more than 1 blob found")
+	}
+
+	return infos[0], nil
+}
+
+// GetFileInfos gets URL, Title to all blobs in the specified container
 // Urls are with a shared access signature (SAS)
 // for limited read access
 // and valid for one day.
-func GetFileInfos(containerName, path string) ([]*TFileInfo, error) {
+func GetFileInfos(containerName, path string) ([]*AzFileInfo, error) {
 	// Create a URL to the target container
 	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", AccountName, containerName))
 	if err != nil {
@@ -92,7 +107,7 @@ func GetFileInfos(containerName, path string) ([]*TFileInfo, error) {
 	containerURL := azblob.NewContainerURL(*URL, Pipeline)
 
 	// List blobs in the container with the specified prefix
-	var fileInfos []*TFileInfo
+	var fileInfos []*AzFileInfo
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		listBlob, err := containerURL.ListBlobsFlatSegment(context.Background(), marker, azblob.ListBlobsSegmentOptions{
 			Prefix: path,
@@ -121,7 +136,7 @@ func GetFileInfos(containerName, path string) ([]*TFileInfo, error) {
 			u := blobURL.URL()
 			uString := u.String()
 			sasURL := fmt.Sprintf("%s?%s", uString, sasQueryParams.Encode())
-			fileInfos = append(fileInfos, &TFileInfo{Name: blobInfo.Name, Url: sasURL})
+			fileInfos = append(fileInfos, &AzFileInfo{Name: blobInfo.Name, Url: sasURL})
 		}
 		marker = listBlob.NextMarker
 	}

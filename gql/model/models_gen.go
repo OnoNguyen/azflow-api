@@ -3,9 +3,10 @@
 package model
 
 type Audio struct {
-	URL   string `json:"url"`
-	Title string `json:"title"`
-	ID    int    `json:"id"`
+	URL        string `json:"url"`
+	CaptionURL string `json:"captionUrl"`
+	Title      string `json:"title"`
+	ID         int    `json:"id"`
 }
 
 type AudioInput struct {
@@ -19,8 +20,9 @@ type BookInput struct {
 }
 
 type EditAudioInput struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	ID      int    `json:"id"`
+	Title   string `json:"title"`
+	Caption string `json:"caption"`
 }
 
 type Mutation struct {

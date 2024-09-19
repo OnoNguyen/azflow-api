@@ -48,9 +48,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Audio struct {
-		ID    func(childComplexity int) int
-		Title func(childComplexity int) int
-		URL   func(childComplexity int) int
+		CaptionURL func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Title      func(childComplexity int) int
+		URL        func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -62,6 +63,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetAudio           func(childComplexity int, id *int) int
 		GetAudios          func(childComplexity int) int
 		GetAudiosForMember func(childComplexity int) int
 		GetLongURL         func(childComplexity int, shortURL string) int
@@ -86,6 +88,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	TrackURL(ctx context.Context) (string, error)
 	GetAudios(ctx context.Context) ([]*model.Audio, error)
+	GetAudio(ctx context.Context, id *int) (*model.Audio, error)
 	GetAudiosForMember(ctx context.Context) ([]*model.Audio, error)
 	GetShortURL(ctx context.Context, id string) (*model.ShortURL, error)
 	GetLongURL(ctx context.Context, shortURL string) (string, error)
@@ -109,6 +112,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Audio.captionUrl":
+		if e.complexity.Audio.CaptionURL == nil {
+			break
+		}
+
+		return e.complexity.Audio.CaptionURL(childComplexity), true
 
 	case "Audio.id":
 		if e.complexity.Audio.ID == nil {
@@ -190,6 +200,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SignUp(childComplexity, args["input"].(*model.SignupInput)), true
+
+	case "Query.getAudio":
+		if e.complexity.Query.GetAudio == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getAudio_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAudio(childComplexity, args["id"].(*int)), true
 
 	case "Query.getAudios":
 		if e.complexity.Query.GetAudios == nil {
@@ -475,6 +497,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getAudio_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getLongURL_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -575,6 +612,50 @@ func (ec *executionContext) _Audio_url(ctx context.Context, field graphql.Collec
 }
 
 func (ec *executionContext) fieldContext_Audio_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Audio",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Audio_captionUrl(ctx context.Context, field graphql.CollectedField, obj *model.Audio) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Audio_captionUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CaptionURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Audio_captionUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Audio",
 		Field:      field,
@@ -771,6 +852,8 @@ func (ec *executionContext) fieldContext_Mutation_createAudio(ctx context.Contex
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
+			case "captionUrl":
+				return ec.fieldContext_Audio_captionUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -834,6 +917,8 @@ func (ec *executionContext) fieldContext_Mutation_editAudio(ctx context.Context,
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
+			case "captionUrl":
+				return ec.fieldContext_Audio_captionUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -1059,6 +1144,8 @@ func (ec *executionContext) fieldContext_Query_getAudios(ctx context.Context, fi
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
+			case "captionUrl":
+				return ec.fieldContext_Audio_captionUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -1066,6 +1153,71 @@ func (ec *executionContext) fieldContext_Query_getAudios(ctx context.Context, fi
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Audio", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getAudio(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getAudio(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAudio(rctx, fc.Args["id"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Audio)
+	fc.Result = res
+	return ec.marshalNAudio2ᚖazflowᚑapiᚋgqlᚋmodelᚐAudio(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getAudio(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_Audio_url(ctx, field)
+			case "captionUrl":
+				return ec.fieldContext_Audio_captionUrl(ctx, field)
+			case "title":
+				return ec.fieldContext_Audio_title(ctx, field)
+			case "id":
+				return ec.fieldContext_Audio_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Audio", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getAudio_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -1111,6 +1263,8 @@ func (ec *executionContext) fieldContext_Query_getAudiosForMember(ctx context.Co
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
+			case "captionUrl":
+				return ec.fieldContext_Audio_captionUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -3346,7 +3500,7 @@ func (ec *executionContext) unmarshalInputEditAudioInput(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "title"}
+	fieldsInOrder := [...]string{"id", "title", "caption"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3367,6 +3521,13 @@ func (ec *executionContext) unmarshalInputEditAudioInput(ctx context.Context, ob
 				return it, err
 			}
 			it.Title = data
+		case "caption":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("caption"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Caption = data
 		}
 	}
 
@@ -3428,6 +3589,11 @@ func (ec *executionContext) _Audio(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Audio")
 		case "url":
 			out.Values[i] = ec._Audio_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "captionUrl":
+			out.Values[i] = ec._Audio_captionUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3592,6 +3758,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getAudios(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getAudio":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAudio(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4499,6 +4687,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
 	return res
 }
 

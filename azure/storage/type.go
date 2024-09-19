@@ -1,6 +1,6 @@
 package storage
 
-type TFileInfo struct {
+type AzFileInfo struct {
 	Name string
 	Url  string
 }
