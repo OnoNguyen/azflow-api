@@ -43,7 +43,7 @@ func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioI
 		return nil, err
 	}
 
-	return story.EditAudio(input.ID, input.Title, input.Caption)
+	return story.EditAudio(input.ID, input.Title, input.Transcript)
 }
 
 // CreateBookSummary is the resolver for the createBookSummary field.
@@ -86,7 +86,7 @@ func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
 
 	audios := make([]*model.Audio, 0, len(as))
 	for _, a := range as {
-		b := model.Audio{Title: a.Title, URL: a.Url, ID: a.Id, CaptionURL: a.CaptionUrl}
+		b := model.Audio{Title: a.Title, URL: a.Url, ID: a.Id, TranscriptURL: a.TranscriptUrl}
 		audios = append(audios, &b)
 	}
 
@@ -107,7 +107,7 @@ func (r *queryResolver) GetAudio(ctx context.Context, id *int) (*model.Audio, er
 		return nil, err
 	}
 
-	return &model.Audio{Title: a.Title, URL: a.Url, ID: a.Id, CaptionURL: a.CaptionUrl}, nil
+	return &model.Audio{Title: a.Title, URL: a.Url, ID: a.Id, TranscriptURL: a.TranscriptUrl}, nil
 }
 
 // GetAudiosForMember is the resolver for the getAudiosForMember field.
@@ -126,7 +126,7 @@ func (r *queryResolver) GetAudiosForMember(ctx context.Context) ([]*model.Audio,
 
 	audios := make([]*model.Audio, 0, len(as))
 	for _, a := range as {
-		b := model.Audio{Title: a.Title, URL: a.Url, ID: a.Id, CaptionURL: a.CaptionUrl}
+		b := model.Audio{Title: a.Title, URL: a.Url, ID: a.Id, TranscriptURL: a.TranscriptUrl}
 		audios = append(audios, &b)
 	}
 

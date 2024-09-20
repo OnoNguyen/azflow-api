@@ -7,7 +7,7 @@ input AudioInput {
 input EditAudioInput {
   id: Int!
   title: String!
-  caption: String!
+  transcript: String!
 }
 
 input SignupInput {
@@ -21,7 +21,7 @@ input BookInput {
 
 type Audio {
   url: String!
-  captionUrl: String!
+  transcriptUrl: String!
   title: String!
   id: Int!
 }

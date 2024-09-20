@@ -1,13 +1,13 @@
 package story
 
 type DmAudio struct {
-	Url        string
-	CaptionUrl string
-	Title      string
-	Id         int
+	Url           string
+	TranscriptUrl string
+	Title         string
+	Id            int
 }
 
-type PgAudio struct {
+type DbAudio struct {
 	Id       int    `db:"id"`
 	ExtId    string `db:"ext_id"`
 	Title    string `db:"title"`

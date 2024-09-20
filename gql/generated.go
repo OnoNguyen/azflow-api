@@ -48,10 +48,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Audio struct {
-		CaptionURL func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Title      func(childComplexity int) int
-		URL        func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Title         func(childComplexity int) int
+		TranscriptURL func(childComplexity int) int
+		URL           func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -113,13 +113,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Audio.captionUrl":
-		if e.complexity.Audio.CaptionURL == nil {
-			break
-		}
-
-		return e.complexity.Audio.CaptionURL(childComplexity), true
-
 	case "Audio.id":
 		if e.complexity.Audio.ID == nil {
 			break
@@ -133,6 +126,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Audio.Title(childComplexity), true
+
+	case "Audio.transcriptUrl":
+		if e.complexity.Audio.TranscriptURL == nil {
+			break
+		}
+
+		return e.complexity.Audio.TranscriptURL(childComplexity), true
 
 	case "Audio.url":
 		if e.complexity.Audio.URL == nil {
@@ -624,8 +624,8 @@ func (ec *executionContext) fieldContext_Audio_url(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Audio_captionUrl(ctx context.Context, field graphql.CollectedField, obj *model.Audio) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Audio_captionUrl(ctx, field)
+func (ec *executionContext) _Audio_transcriptUrl(ctx context.Context, field graphql.CollectedField, obj *model.Audio) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Audio_transcriptUrl(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -638,7 +638,7 @@ func (ec *executionContext) _Audio_captionUrl(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CaptionURL, nil
+		return obj.TranscriptURL, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -655,7 +655,7 @@ func (ec *executionContext) _Audio_captionUrl(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Audio_captionUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Audio_transcriptUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Audio",
 		Field:      field,
@@ -852,8 +852,8 @@ func (ec *executionContext) fieldContext_Mutation_createAudio(ctx context.Contex
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
-			case "captionUrl":
-				return ec.fieldContext_Audio_captionUrl(ctx, field)
+			case "transcriptUrl":
+				return ec.fieldContext_Audio_transcriptUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -917,8 +917,8 @@ func (ec *executionContext) fieldContext_Mutation_editAudio(ctx context.Context,
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
-			case "captionUrl":
-				return ec.fieldContext_Audio_captionUrl(ctx, field)
+			case "transcriptUrl":
+				return ec.fieldContext_Audio_transcriptUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -1144,8 +1144,8 @@ func (ec *executionContext) fieldContext_Query_getAudios(ctx context.Context, fi
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
-			case "captionUrl":
-				return ec.fieldContext_Audio_captionUrl(ctx, field)
+			case "transcriptUrl":
+				return ec.fieldContext_Audio_transcriptUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -1198,8 +1198,8 @@ func (ec *executionContext) fieldContext_Query_getAudio(ctx context.Context, fie
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
-			case "captionUrl":
-				return ec.fieldContext_Audio_captionUrl(ctx, field)
+			case "transcriptUrl":
+				return ec.fieldContext_Audio_transcriptUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -1263,8 +1263,8 @@ func (ec *executionContext) fieldContext_Query_getAudiosForMember(ctx context.Co
 			switch field.Name {
 			case "url":
 				return ec.fieldContext_Audio_url(ctx, field)
-			case "captionUrl":
-				return ec.fieldContext_Audio_captionUrl(ctx, field)
+			case "transcriptUrl":
+				return ec.fieldContext_Audio_transcriptUrl(ctx, field)
 			case "title":
 				return ec.fieldContext_Audio_title(ctx, field)
 			case "id":
@@ -3500,7 +3500,7 @@ func (ec *executionContext) unmarshalInputEditAudioInput(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "title", "caption"}
+	fieldsInOrder := [...]string{"id", "title", "transcript"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3521,13 +3521,13 @@ func (ec *executionContext) unmarshalInputEditAudioInput(ctx context.Context, ob
 				return it, err
 			}
 			it.Title = data
-		case "caption":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("caption"))
+		case "transcript":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transcript"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Caption = data
+			it.Transcript = data
 		}
 	}
 
@@ -3592,8 +3592,8 @@ func (ec *executionContext) _Audio(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "captionUrl":
-			out.Values[i] = ec._Audio_captionUrl(ctx, field, obj)
+		case "transcriptUrl":
+			out.Values[i] = ec._Audio_transcriptUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

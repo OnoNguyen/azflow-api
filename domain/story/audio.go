@@ -73,10 +73,10 @@ func GetAudios(path string) ([]*DmAudio, error) {
 		}
 
 		audios = append(audios, &DmAudio{
-			Url:        urlMap[info.ExtId],
-			CaptionUrl: urlMap[info.ExtId+".txt"],
-			Title:      title,
-			Id:         info.Id,
+			Url:           urlMap[info.ExtId],
+			TranscriptUrl: urlMap[info.ExtId+".txt"],
+			Title:         title,
+			Id:            info.Id,
 		})
 	}
 
@@ -86,7 +86,7 @@ func GetAudios(path string) ([]*DmAudio, error) {
 // getInfoFromDB gets a list of audio info from db via CTE,
 // where input is names array,
 // and output is a list of matching titles and ids
-func getInfoFromDB(names []string) ([]*PgAudio, error) {
+func getInfoFromDB(names []string) ([]*DbAudio, error) {
 	query := `
         WITH name_cte AS (
             SELECT unnest($1::text[]) AS ext_id
@@ -96,7 +96,7 @@ func getInfoFromDB(names []string) ([]*PgAudio, error) {
         JOIN audio a ON n.ext_id = a.ext_id;
     `
 
-	var audios []*PgAudio
+	var audios []*DbAudio
 	err := pgxscan.Select(context.Background(), db.Conn, &audios, query, pq.Array(names))
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 	openai.Tts(text, voice, outFile)
 
 	azureAudioFilePath := fmt.Sprintf("%s/%s", memberEmail, fileName)
-	azureCaptionFilePath := azureAudioFilePath + ".txt"
+	azureTranscriptFilePath := azureAudioFilePath + ".txt"
 
 	fmt.Println("Uploading MP3 file to Azure Blob Storage...", azureAudioFilePath)
 	err := storage.UploadFile(ContainerName, azureAudioFilePath, filePath)
@@ -131,43 +131,51 @@ func CreateAudio(memberEmail string, memberExtId string, text string, voice stri
 		return nil, err
 	}
 
-	fmt.Println("Uploading caption file to Azure Blob Storage...", azureCaptionFilePath)
-	// Create a temporary file for the caption
-	captionFile, err := os.CreateTemp("", "caption-*.txt")
+	err = uploadTranscript(azureTranscriptFilePath, text)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create temporary caption file: %w", err)
-	}
-	defer os.Remove(captionFile.Name()) // Clean up the temporary file when done
-
-	// Write the text content to the temporary file
-	_, err = captionFile.WriteString(text)
-	if err != nil {
-		return nil, fmt.Errorf("failed to write caption to temporary file: %w", err)
-	}
-	captionFile.Close() // Close the file to ensure all data is written
-
-	// Upload the caption file to Azure Blob Storage
-	err = storage.UploadFile(ContainerName, azureCaptionFilePath, captionFile.Name())
-	if err != nil {
-		return nil, fmt.Errorf("failed to upload caption file: %w", err)
+		return nil, err
 	}
 
 	// note: audioExtId is azureAudioFilePath
 	return insertAudio(memberEmail, memberExtId, azureAudioFilePath, fileName, title)
 }
 
-// EditAudio edits audio title
-func EditAudio(id int, title string, caption string) (*model.Audio, error) {
+func uploadTranscript(azureTranscriptFilePath string, text string) error {
+	fmt.Println("Uploading transcript file to Azure Blob Storage...", azureTranscriptFilePath)
+	// Create a temporary file for the transcript
+	transcriptFile, err := os.CreateTemp("", "transcript-*.txt")
+	if err != nil {
+		return fmt.Errorf("failed to create temporary transcript file: %w", err)
+	}
+	defer os.Remove(transcriptFile.Name()) // Clean up the temporary file when done
 
-	var audioInfo PgAudio
-	err := pgxscan.Get(context.Background(), db.Conn, &audioInfo, "UPDATE audio SET title = $1 WHERE id = $2 RETURNING id, title, ext_id as extId", title, id)
+	// Write the text content to the temporary file
+	_, err = transcriptFile.WriteString(text)
+	if err != nil {
+		return fmt.Errorf("failed to write transcript to temporary file: %w", err)
+	}
+	transcriptFile.Close() // Close the file to ensure all data is written
+
+	// Upload the transcript file to Azure Blob Storage
+	err = storage.UploadFile(ContainerName, azureTranscriptFilePath, transcriptFile.Name())
+	if err != nil {
+		return fmt.Errorf("failed to upload transcript file: %w", err)
+	}
+	return nil
+}
+
+// EditAudio edits audio title
+func EditAudio(id int, title string, transcript string) (*model.Audio, error) {
+
+	var audioInfo DbAudio
+	err := pgxscan.Get(context.Background(), db.Conn, &audioInfo, "UPDATE audio SET title = $1 WHERE id = $2 RETURNING id, title, ext_id", title, id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	azureCaptionFilePath := fmt.Sprintf("%s.txt", audioInfo.ExtId)
-	err = storage.UploadFile(ContainerName, azureCaptionFilePath, caption)
+	azureTranscriptFilePath := fmt.Sprintf("%s.txt", audioInfo.ExtId)
+	err = uploadTranscript(azureTranscriptFilePath, transcript)
 	if err != nil {
 		return nil, err
 	}
