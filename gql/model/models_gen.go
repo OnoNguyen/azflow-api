@@ -25,6 +25,10 @@ type EditAudioInput struct {
 	Transcript string `json:"transcript"`
 }
 
+type ImagePromptInput struct {
+	Prompt string `json:"prompt"`
+}
+
 type Mutation struct {
 }
 

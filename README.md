@@ -63,3 +63,10 @@ docker rm azflow-api
 
 
 ```
+
+for local dev specify ENV="local" and put the following into request header to authenticate:
+```
+{
+  "Authorization": "azflow@local.dev"
+}
+```

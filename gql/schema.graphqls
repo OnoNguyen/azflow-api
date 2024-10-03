@@ -19,6 +19,10 @@ input BookInput {
   title: String!
 }
 
+input ImagePromptInput {
+  prompt: String!
+}
+
 type Audio {
   url: String!
   transcriptUrl: String!
@@ -33,7 +37,6 @@ type ShortURL {
 }
 
 type Query {
-  trackUrl: String!
   # get all audios without filtering
   getAudios: [Audio!]!
   getAudio(id: Int): Audio!
@@ -49,4 +52,6 @@ type Mutation {
   editAudio(input: EditAudioInput!): Audio!
   createBookSummary(input: BookInput): String!
   createShortURL(longURL: String!): ShortURL!
+  generateImage(input: ImagePromptInput!): String!
+
 }

@@ -59,6 +59,7 @@ type ComplexityRoot struct {
 		CreateBookSummary func(childComplexity int, input *model.BookInput) int
 		CreateShortURL    func(childComplexity int, longURL string) int
 		EditAudio         func(childComplexity int, input model.EditAudioInput) int
+		GenerateImage     func(childComplexity int, input model.ImagePromptInput) int
 		SignUp            func(childComplexity int, input *model.SignupInput) int
 	}
 
@@ -68,7 +69,6 @@ type ComplexityRoot struct {
 		GetAudiosForMember func(childComplexity int) int
 		GetLongURL         func(childComplexity int, shortURL string) int
 		GetShortURL        func(childComplexity int, id string) int
-		TrackURL           func(childComplexity int) int
 	}
 
 	ShortURL struct {
@@ -84,9 +84,9 @@ type MutationResolver interface {
 	EditAudio(ctx context.Context, input model.EditAudioInput) (*model.Audio, error)
 	CreateBookSummary(ctx context.Context, input *model.BookInput) (string, error)
 	CreateShortURL(ctx context.Context, longURL string) (*model.ShortURL, error)
+	GenerateImage(ctx context.Context, input model.ImagePromptInput) (string, error)
 }
 type QueryResolver interface {
-	TrackURL(ctx context.Context) (string, error)
 	GetAudios(ctx context.Context) ([]*model.Audio, error)
 	GetAudio(ctx context.Context, id *int) (*model.Audio, error)
 	GetAudiosForMember(ctx context.Context) ([]*model.Audio, error)
@@ -189,6 +189,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.EditAudio(childComplexity, args["input"].(model.EditAudioInput)), true
 
+	case "Mutation.generateImage":
+		if e.complexity.Mutation.GenerateImage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateImage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateImage(childComplexity, args["input"].(model.ImagePromptInput)), true
+
 	case "Mutation.signUp":
 		if e.complexity.Mutation.SignUp == nil {
 			break
@@ -251,13 +263,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetShortURL(childComplexity, args["id"].(string)), true
 
-	case "Query.trackUrl":
-		if e.complexity.Query.TrackURL == nil {
-			break
-		}
-
-		return e.complexity.Query.TrackURL(childComplexity), true
-
 	case "ShortURL.id":
 		if e.complexity.ShortURL.ID == nil {
 			break
@@ -290,6 +295,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAudioInput,
 		ec.unmarshalInputBookInput,
 		ec.unmarshalInputEditAudioInput,
+		ec.unmarshalInputImagePromptInput,
 		ec.unmarshalInputSignupInput,
 	)
 	first := true
@@ -459,6 +465,21 @@ func (ec *executionContext) field_Mutation_editAudio_args(ctx context.Context, r
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNEditAudioInput2azflowᚑapiᚋgqlᚋmodelᚐEditAudioInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_generateImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.ImagePromptInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNImagePromptInput2azflowᚑapiᚋgqlᚋmodelᚐImagePromptInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1059,8 +1080,8 @@ func (ec *executionContext) fieldContext_Mutation_createShortURL(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_trackUrl(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_trackUrl(ctx, field)
+func (ec *executionContext) _Mutation_generateImage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_generateImage(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1073,7 +1094,7 @@ func (ec *executionContext) _Query_trackUrl(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().TrackURL(rctx)
+		return ec.resolvers.Mutation().GenerateImage(rctx, fc.Args["input"].(model.ImagePromptInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1090,15 +1111,26 @@ func (ec *executionContext) _Query_trackUrl(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_trackUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_generateImage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Query",
+		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -3534,6 +3566,33 @@ func (ec *executionContext) unmarshalInputEditAudioInput(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputImagePromptInput(ctx context.Context, obj interface{}) (model.ImagePromptInput, error) {
+	var it model.ImagePromptInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"prompt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "prompt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("prompt"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Prompt = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSignupInput(ctx context.Context, obj interface{}) (model.SignupInput, error) {
 	var it model.SignupInput
 	asMap := map[string]interface{}{}
@@ -3684,6 +3743,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "generateImage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateImage(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3726,28 +3792,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "trackUrl":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_trackUrl(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "getAudios":
 			field := field
 
@@ -4357,6 +4401,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNImagePromptInput2azflowᚑapiᚋgqlᚋmodelᚐImagePromptInput(ctx context.Context, v interface{}) (model.ImagePromptInput, error) {
+	res, err := ec.unmarshalInputImagePromptInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {

@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/rsa"
 	"fmt"
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/lestrrat-go/jwx/jwk"
 	"net/http"
@@ -34,7 +33,25 @@ func Middleware() func(http.Handler) http.Handler {
 				return
 			}
 
+			// Check if it's a local dev request
+			if authHeader == "azflow@local.dev" {
+				env := os.Getenv("ENV")
+				if env == "local" {
+					user := &account.Member{
+						Email: authHeader,
+						ExtId: "12345",
+					}
+
+					// Pass the request to the next handler with account info in context
+					ctx := context.WithValue(r.Context(), userCtxKey, user)
+					next.ServeHTTP(w, r.WithContext(ctx))
+
+					return
+				}
+			}
+
 			tokenString := authHeader[len("Bearer "):]
+
 			verified, err := verifyToken(tokenString, r.Context())
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -100,25 +117,6 @@ func verifyToken(tokenString string, context context.Context) (*jwt.Token, error
 	}
 
 	return token, nil
-}
-
-func acquireToken() (string, error) {
-	cred, err := confidential.NewCredFromSecret(ClientSecret)
-	if err != nil {
-		return "", err
-	}
-
-	clientApp, err := confidential.New(Authority, ClientID, cred)
-	if err != nil {
-		return "", err
-	}
-
-	result, err := clientApp.AcquireTokenByCredential(context.Background(), []string{"https://graph.microsoft.com/.default"})
-	if err != nil {
-		return "", err
-	}
-
-	return result.AccessToken, nil
 }
 
 func Init() {
