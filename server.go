@@ -19,7 +19,10 @@ import (
 	"os"
 )
 
-const defaultPort = "8080"
+const (
+	defaultPort = "8080"
+	RootDir     = "./"
+)
 
 func main() {
 	err := godotenv.Load()

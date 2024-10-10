@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/sashabaranov/go-openai"
 	"io"
 	"net/http"
 	"os"
@@ -11,10 +12,15 @@ import (
 	"strings"
 )
 
-var Token string
+var (
+	Token  string
+	Client *openai.Client
+)
 
 func Init() {
-	Token = "Bearer " + os.Getenv("OPENAI_API_KEY")
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	Token = "Bearer " + apiKey
+	Client = openai.NewClient(apiKey)
 }
 
 // Tts stands for text to speech

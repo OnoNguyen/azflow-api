@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.45
 	github.com/Azure/azure-pipeline-go v0.2.3
 	github.com/Azure/azure-storage-blob-go v0.15.0
-	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2
+	github.com/flashlabs/rootpath v1.1.5
 	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
@@ -17,6 +17,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.29
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
+	github.com/sashabaranov/go-openai v1.31.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.11
 )
@@ -27,7 +28,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -36,7 +36,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
