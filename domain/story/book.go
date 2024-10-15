@@ -24,18 +24,19 @@ func CreateBookSummary(title string) (string, error) {
 }
 
 type SummaryStruct struct {
-	BookSummary string `json:"book_summary"`
-	ImageIdeas  []struct {
-		IdeaDescription string `json:"idea_description"`
-	}
+	Introduction      string   `json:"introduction"`
+	MainSummaries     []string `json:"main_summaries"`
+	Conclusion        string   `json:"conclusion"`
+	IntroductionImage string   `json:"intro_image"`
+	ConclusionImage   string   `json:"conclusion_image"`
+	MainSummaryImages []string `json:"image_ideas"`
 }
 
 func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
-
 	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
-		"Summarize this book title with less than 4000 words,"+
-			"then create a list of image ideas for the first main points of the summary,"+
-			"if the idea involved creating human or animal, be specific about skin colour, hair colour and hair style, eye and ear features.", title)
+		"From the book title create an introduction, a list of different paragraphs of elaborations from the key points of the book, and then a conclusion."+
+			" Each paragraph should be less than 1000 words. "+
+			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, don't include human, and the number of images has to match the number of paragraphs.", title)
 }
 
 func CreateBookSummaryVideo(title string) (string, error) {
@@ -51,22 +52,6 @@ func CreateBookSummaryVideo(title string) (string, error) {
 		return "", err
 	}
 
-	// create images
-	for i, idea := range sumStruct.ImageIdeas {
-		_, err := openai.CreateImage(idea.IdeaDescription, fmt.Sprintf("%s/%d.png", videoFolder, i+1))
-		if err != nil {
-			return "", err
-		}
-	}
-
-	// create and save audio
-	outFile, err := os.Create(fmt.Sprintf("%s/audio.mp3", videoFolder))
-	if err != nil {
-		return "", err
-	}
-	defer outFile.Close()
-	openai.Tts(sumStruct.BookSummary, "", outFile)
-
 	// create and save meta
 	outFile2, err2 := os.Create(fmt.Sprintf("%s/meta.json", videoFolder))
 	if err2 != nil {
@@ -77,6 +62,44 @@ func CreateBookSummaryVideo(title string) (string, error) {
 	formattedJSON, err := json.MarshalIndent(sumStruct, "", "  ") // Indent with two spaces
 	if _, err := outFile2.Write(formattedJSON); err != nil {
 		return "", err
+	}
+
+	// create images and audios for the introduction and conclusion
+	_, err = openai.CreateImage(sumStruct.Introduction, fmt.Sprintf("%s/0-intro.png", videoFolder))
+	if err != nil {
+		return "", err
+	}
+	_, err = openai.CreateImage(sumStruct.Conclusion, fmt.Sprintf("%s/%d-conc.png", videoFolder, len(sumStruct.MainSummaries)+1))
+	if err != nil {
+		return "", err
+	}
+
+	outFile, err := os.Create(fmt.Sprintf("%s/0-intro.mp3", videoFolder))
+	if err != nil {
+		return "", err
+	}
+	openai.Tts(sumStruct.Introduction, "", outFile)
+	outFile.Close()
+	outFile, err = os.Create(fmt.Sprintf("%s/%d-conc.mp3", videoFolder, len(sumStruct.MainSummaries)+1))
+	if err != nil {
+		return "", err
+	}
+	openai.Tts(sumStruct.Conclusion, "", outFile)
+	outFile.Close()
+
+	// create images and audios for the summaries
+	for i, idea := range sumStruct.MainSummaryImages {
+		_, err := openai.CreateImage(idea, fmt.Sprintf("%s/%d.png", videoFolder, i+1))
+		if err != nil {
+			return "", err
+		}
+
+		outFile, err := os.Create(fmt.Sprintf("%s/%d.mp3", videoFolder, i+1))
+		if err != nil {
+			return "", err
+		}
+		openai.Tts(sumStruct.MainSummaries[i], "", outFile)
+		outFile.Close()
 	}
 
 	// create video

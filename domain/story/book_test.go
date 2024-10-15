@@ -19,11 +19,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateBookSummaryAndImageIdeas(t *testing.T) {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	openai.Init()
 
 	result, err := CreateBookSummaryAndImageIdeas("Gambler by Billy Walter")
@@ -47,7 +42,7 @@ func TestCreateBookSummaryVideo(t *testing.T) {
 
 func TestFfemgExecutor(t *testing.T) {
 	// create video
-	err := ffmeg.ExecuteScript("/Users/hungnguyen/src/azflow-api/domain/story/video/20241009-194140")
+	err := ffmeg.ExecuteScript("/Users/hungnguyen/src/azflow-api/video/20241015-182758")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
