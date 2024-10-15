@@ -37,7 +37,7 @@ func TestCreateBookSummaryAndImageIdeas(t *testing.T) {
 func TestCreateBookSummaryVideo(t *testing.T) {
 	openai.Init()
 
-	result, err := CreateBookSummaryVideo("Zero to one by Peter Thiel")
+	result, err := CreateBookSummaryVideo("The intelligent investor by Benjamin Graham")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}

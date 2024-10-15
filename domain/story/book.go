@@ -34,8 +34,8 @@ func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
 
 	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
 		"Summarize this book title with less than 4000 words,"+
-			"then create a list of image ideas for the first main points of the summary"+
-			"then create a list of images for the corresponding ideas", title)
+			"then create a list of image ideas for the first main points of the summary,"+
+			"if the idea involved creating human or animal, be specific about skin colour, hair colour and hair style, eye and ear features.", title)
 }
 
 func CreateBookSummaryVideo(title string) (string, error) {
@@ -74,9 +74,8 @@ func CreateBookSummaryVideo(title string) (string, error) {
 	}
 	defer outFile2.Close()
 	// convert sumStruct to json str and write to file
-	json, _ := json.Marshal(sumStruct)
-	str := fmt.Sprintf("%s", json)
-	if _, err := outFile2.WriteString(str); err != nil {
+	formattedJSON, err := json.MarshalIndent(sumStruct, "", "  ") // Indent with two spaces
+	if _, err := outFile2.Write(formattedJSON); err != nil {
 		return "", err
 	}
 
