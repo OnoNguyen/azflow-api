@@ -1,7 +1,7 @@
 package story
 
 import (
-	"azflow-api/ffmeg"
+	"azflow-api/ffmpeg"
 	"azflow-api/openai"
 	"context"
 	"encoding/json"
@@ -107,7 +107,7 @@ func CreateBookSummaryVideo(title string) (string, error) {
 	if err3 != nil {
 		return "", err3
 	}
-	if err := ffmeg.ExecuteScript(abs); err != nil {
+	if err := ffmpeg.ExecuteScript(abs); err != nil {
 		return "", err
 	}
 

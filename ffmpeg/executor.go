@@ -1,4 +1,4 @@
-package ffmeg
+package ffmpeg
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-const scriptPath = "./ffmeg/create_video.sh"
+const scriptPath = "./ffmpeg/create_video.sh"
 
 // ExecuteScript Function to execute the shell script
 func ExecuteScript(workDir string) error {

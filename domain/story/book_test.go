@@ -1,7 +1,7 @@
 package story
 
 import (
-	"azflow-api/ffmeg"
+	"azflow-api/ffmpeg"
 	"azflow-api/openai"
 	_ "github.com/flashlabs/rootpath"
 	"github.com/joho/godotenv"
@@ -42,7 +42,7 @@ func TestCreateBookSummaryVideo(t *testing.T) {
 
 func TestFfemgExecutor(t *testing.T) {
 	// create video
-	err := ffmeg.ExecuteScript("/Users/hungnguyen/src/azflow-api/video/20241016-180220")
+	err := ffmpeg.ExecuteScript("/Users/hungnguyen/src/azflow-api/video/20241016-180220")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
