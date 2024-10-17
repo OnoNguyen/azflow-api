@@ -58,7 +58,8 @@ func CreateImage(prompt string, imagePath string) (string, error) {
 	request := openai.ImageRequest{
 		Prompt: prompt,
 		N:      1,
-		Size:   "1024x1024",
+		Size:   openai.CreateImageSize1024x1792,
+		Model:  openai.CreateImageModelDallE3,
 	}
 
 	response, err := Client.CreateImage(context.Background(), request)

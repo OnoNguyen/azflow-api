@@ -36,7 +36,7 @@ func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
 	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
 		"From the book title create an introduction, a list of different paragraphs of elaborations from the key points of the book, and then a conclusion."+
 			" Each paragraph should be less than 1000 words. "+
-			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, don't include human, and the number of images has to match the number of paragraphs.", title)
+			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation, and the number of images has to match the number of paragraphs.", title)
 }
 
 func CreateBookSummaryVideo(title string) (string, error) {
