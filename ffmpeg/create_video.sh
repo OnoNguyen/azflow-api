@@ -113,11 +113,11 @@ debug_print "Concatenating intermediate videos into $output_video..."
 ./ffmpeg -y -f concat -safe 0 -i "$concat_list" -c copy "$output_video"
 
 # Compress the final output video
-compressed_video="${workDir}/output_compressed.mp4"
-debug_print "Compressing the final output video..."
-./ffmpeg -y -i "$output_video" -vcodec libx265 -crf 28 -preset fast "$compressed_video"
-
-debug_print "FFmpeg concatenation and compression completed"
-debug_print "Compressed output video: $compressed_video"
+#compressed_video="${workDir}/output_compressed.mp4"
+#debug_print "Compressing the final output video..."
+#./ffmpeg -y -i "$output_video" -vcodec libx265 -crf 28 -preset fast "$compressed_video"
+#
+#debug_print "FFmpeg concatenation and compression completed"
+#debug_print "Compressed output video: $compressed_video"
 
 debug_print "Script finished"
