@@ -42,13 +42,8 @@ mkdir -p "$LOG_DIR"
 
 # Create temporary directory for intermediate videos
 TRUNK_DIR="$workDir/trunks"
+rm -rf "$TRUNK_DIR"
 mkdir -p "$TRUNK_DIR"
-
-# Function to clean up temporary files
-cleanup() {
-    debug_print "Cleaning up temporary files..."
-    rm -rf "$TRUNK_DIR"
-}
 
 # Function to process each pair of audio and image files
 process_trunk() {
@@ -62,14 +57,14 @@ process_trunk() {
     duration=$(printf "%.6f" "$duration")
     debug_print "Duration: $duration seconds"
 
-    # Calculate new duration with 1 second of silence added
-    new_duration=$(echo "$duration + 1" | bc)
+    # Calculate new duration with 0.5 second of silence added
+    new_duration=$(echo "$duration + 0.5" | bc)
     debug_print "New video duration: $new_duration seconds"
 
     # Create intermediate video for this pair
     intermediate_video="${TRUNK_DIR}/${base_name}_video.mp4"
 
-    debug_print "Creating intermediate video for $audio_file and $image_file with 1 second of silence..."
+    debug_print "Creating intermediate video for $audio_file and $image_file..."
     ./ffmpeg -y \
         -loop 1 -t "$new_duration" -i "$image_file" \
         -i "$audio_file" \
@@ -78,6 +73,7 @@ process_trunk() {
         -c:v libx264 -pix_fmt yuv420p \
         -c:a aac -shortest \
         "$intermediate_video"
+
 }
 
 # Find and process matching audio and image files

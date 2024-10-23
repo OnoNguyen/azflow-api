@@ -77,6 +77,59 @@ func Tts(input string, voice string, outFile *os.File) {
 
 }
 
+// TextToSpeech sends a POST request to the OpenAI API and takes a string input and a voice string and returns the responded voice as an io.ReadCloser if successful.
+func TextToSpeech(input string, voice string, outFilePath string) error {
+	if voice == "" {
+		voice = "onyx"
+	}
+
+	url := "https://api.openai.com/v1/audio/speech"
+
+	requestBody, err := json.Marshal(map[string]string{
+		"model": "tts-1",
+		"input": input,
+		"voice": voice,
+	})
+	if err != nil {
+		return err
+	}
+
+	req, err1 := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	if err1 != nil {
+		return err1
+	}
+
+	req.Header.Set("Authorization", Token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err2 := client.Do(req)
+	if err2 != nil {
+		return err2
+	}
+	defer resp.Body.Close()
+
+	// print error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("Non-OK HTTP status: %s\nResponse body: %s\n", resp.Status, string(body))
+	}
+
+	outFile, err3 := os.Create(outFilePath)
+	if err3 != nil {
+		return err3
+	}
+
+	// Write the response body to the file
+	if _, err = io.Copy(outFile, resp.Body); err != nil {
+		return err
+	}
+
+	fmt.Printf("File saved successfully: %s", outFilePath)
+	return nil
+
+}
+
 // ImageGen generates an image using the DALL-E API and saves it into the images folder
 func ImageGen(prompt string) (string, error) {
 	url := "https://api.openai.com/v1/images/generations"

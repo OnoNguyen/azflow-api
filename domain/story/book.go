@@ -24,6 +24,7 @@ func CreateBookSummary(title string) (string, error) {
 }
 
 type SummaryStruct struct {
+	Title             string   `json:"title"`
 	Introduction      string   `json:"introduction"`
 	MainSummaries     []string `json:"main_summaries"`
 	Conclusion        string   `json:"conclusion"`
@@ -35,8 +36,17 @@ type SummaryStruct struct {
 func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
 	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
 		"From the book title create an introduction, a list of different paragraphs of elaborations from the key points of the book, and then a conclusion."+
-			" Each paragraph should be less than 1000 words. "+
+			" Each paragraph should be less than 500 words and sounds like a motivational talk, avoid mentioning the book title, the chapter number, and the author name. "+
 			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation, and the number of images has to match the number of paragraphs.", title)
+}
+
+func CreateChapterSummaryAndImageIdeas(title string, chapter int) (*SummaryStruct, error) {
+	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
+		"From the book title and chapter number create a title in the form [[Book Title] Chapter [Chapter Number] [Chapter Title]], for example: \"Zero to One, Chapter 1: The Challenge of Future\", an introduction, a list of different paragraphs of elaborations from the key points of the chapter, and then a conclusion."+
+			" Each paragraph should be less than 300 words. "+
+			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation,"+
+			" and the number of images has to match the number of paragraphs.",
+		fmt.Sprintf("%s. Chapter %d", title, chapter))
 }
 
 func CreateBookSummaryVideo(title string) (string, error) {
@@ -53,14 +63,15 @@ func CreateBookSummaryVideo(title string) (string, error) {
 	}
 
 	// create and save meta
-	outFile2, err2 := os.Create(fmt.Sprintf("%s/meta.json", videoFolder))
+	metaFile, err2 := os.Create(fmt.Sprintf("%s/meta.json", videoFolder))
 	if err2 != nil {
 		return "", err2
 	}
-	defer outFile2.Close()
+	defer metaFile.Close()
+
 	// convert sumStruct to json str and write to file
 	formattedJSON, err := json.MarshalIndent(sumStruct, "", "  ") // Indent with two spaces
-	if _, err := outFile2.Write(formattedJSON); err != nil {
+	if _, err := metaFile.Write(formattedJSON); err != nil {
 		return "", err
 	}
 
