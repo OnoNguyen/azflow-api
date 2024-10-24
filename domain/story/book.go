@@ -25,6 +25,7 @@ func CreateBookSummary(title string) (string, error) {
 
 type SummaryStruct struct {
 	Title             string   `json:"title"`
+	KeyPoint          string   `json:"key_point"`
 	Introduction      string   `json:"introduction"`
 	MainSummaries     []string `json:"main_summaries"`
 	Conclusion        string   `json:"conclusion"`
@@ -42,10 +43,14 @@ func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
 
 func CreateChapterSummaryAndImageIdeas(title string, chapter int) (*SummaryStruct, error) {
 	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
-		"From the book title and chapter number create a title in the form [[Book Title] Chapter [Chapter Number] [Chapter Title]], for example: \"Zero to One, Chapter 1: The Challenge of Future\", an introduction, a list of different paragraphs of elaborations from the key points of the chapter, and then a conclusion."+
-			" Each paragraph should be less than 300 words. "+
-			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation,"+
-			" and the number of images has to match the number of paragraphs.",
+		"From the book title and chapter number create:\n"+
+			"1. The title of the chapter in the following form: '[Book Title] Chapter [Chapter Number] [Chapter Title]', for example: 'Zero to One, Chapter 7: Follow the Money'\n"+
+			"2. An introduction into the chapter.\n"+
+			"3. The key point of the chapter in 1 sentence.\n"+
+			"3. A list of short paragraphs to summarize the chapter. The paragraphs should be less than 200 words.\n"+
+			"4. The conclusion of the chapter.\n"+
+			"Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation.\n1"+
+			"The number of images has to match the number of paragraphs.",
 		fmt.Sprintf("%s. Chapter %d", title, chapter))
 }
 

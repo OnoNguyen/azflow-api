@@ -89,7 +89,7 @@ func TestCreateBookSummaryAndImageIdeas(t *testing.T) {
 func TestCreateBookSummaryVideo(t *testing.T) {
 	openai.Init()
 
-	result, err := CreateBookSummaryVideo("Zero to on")
+	result, err := CreateBookSummaryVideo("Zero to one")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -98,7 +98,7 @@ func TestCreateBookSummaryVideo(t *testing.T) {
 }
 
 func TestFfemgExecutor(t *testing.T) {
-	workDir := "/Users/hungnguyen/src/azflow-api/video/20241016-180220-viet"
+	workDir := "/Users/hungnguyen/src/azflow-api/video/20241023-181934"
 	// create video
 	err := ffmpeg.ExecuteScript(workDir)
 	if err != nil {

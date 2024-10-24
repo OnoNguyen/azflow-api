@@ -50,6 +50,7 @@ process_trunk() {
     local audio_file="$1"
     local image_file="$2"
     local base_name="$3"
+    local quote="What important truth do very few people agree with you on?"
 
     # Get duration of the current audio file
     debug_print "Getting duration for $audio_file..."
@@ -65,15 +66,15 @@ process_trunk() {
     intermediate_video="${TRUNK_DIR}/${base_name}_video.mp4"
 
     debug_print "Creating intermediate video for $audio_file and $image_file..."
-    ./ffmpeg -y \
-        -loop 1 -t "$new_duration" -i "$image_file" \
-        -i "$audio_file" \
-        -filter_complex "[1:a]apad=pad_dur=1[apadded]" \
-        -map 0:v -map "[apadded]" \
-        -c:v libx264 -pix_fmt yuv420p \
-        -c:a aac -shortest \
-        "$intermediate_video"
-
+  ./ffmpeg -y \
+    -loop 1 -t "$new_duration" -i "$image_file" \
+    -i "$audio_file" \
+    -filter_complex "[1:a]apad=pad_dur=1[apadded]; \
+                     [0:v]subtitles=$workDir/$base_name.ass [video_with_subtitles]" \
+    -map "[video_with_subtitles]" -map "[apadded]" \
+    -c:v libx264 -pix_fmt yuv420p \
+    -c:a aac -shortest \
+    "$intermediate_video"
 }
 
 # Find and process matching audio and image files
