@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRecreateAudiosFromWorkDir(t *testing.T) {
-	workDir := "/Users/hungnguyen/src/azflow-api/video/20241016-180220-viet"
+	workDir := "/Users/hungnguyen/src/azflow-api/video/zero-to-one-viet"
 
 	openai.Init()
 	// Read meta.json from metaPath

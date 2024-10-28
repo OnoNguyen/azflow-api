@@ -25,6 +25,7 @@ func Init() {
 
 // Tts stands for text to speech
 // It sends a POST request to the OpenAI API and takes a string input and a voice string and returns the responded voice as an io.ReadCloser if successful.
+// Deprecated: Use TextToSpeech instead
 func Tts(input string, voice string, outFile *os.File) {
 	if voice == "" {
 		voice = "onyx"
