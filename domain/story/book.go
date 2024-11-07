@@ -43,14 +43,15 @@ func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
 
 func CreateChapterSummaryAndImageIdeas(title string, chapter int) (*SummaryStruct, error) {
 	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
-		"From the book title and chapter number create:\n"+
-			"1. The title of the chapter in the following form: '[Book Title] Chapter [Chapter Number] [Chapter Title]', for example: 'Zero to One, Chapter 7: Follow the Money'\n"+
-			"2. An introduction into the chapter.\n"+
-			"3. The key point of the chapter in 1 sentence.\n"+
-			"3. A list of short paragraphs to summarize the chapter. The paragraphs should be less than 200 words.\n"+
-			"4. The conclusion of the chapter.\n"+
-			"Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation.\n1"+
-			"The number of images has to match the number of paragraphs.",
+		"You are a helpful scholar, have been reading a lot of books in the world."+
+			"Given a book title and a chapter number in the book, you help find out:"+
+			"	1. The title of the chapter in the following form: '[Book Title] Chapter [Chapter Number] [Chapter Title]', for example: 'Zero to One, Chapter 7: Follow the Money'."+
+			"	2. An introduction into the chapter."+
+			"	3. The key point of the chapter in 1 sentence."+
+			"	4. A list of short paragraphs to summarize the chapter. The paragraphs should be less than 200 words. The last paragraph is a real world example illustrating the key point of the chapter."+
+			"	5. The conclusion of the chapter."+
+			"	6. Don't use author name in all the paragraphs."+
+			"Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation. The number of images has to match the number of paragraphs.",
 		fmt.Sprintf("%s. Chapter %d", title, chapter))
 }
 
@@ -68,7 +69,7 @@ func CreateBookSummaryVideo(title string) (string, error) {
 	}
 
 	// create and save meta
-	metaFile, err2 := os.Create(fmt.Sprintf("%s/meta.json", videoFolder))
+	metaFile, err2 := os.Create(fmt.Sprintf("%s/meta1.json", videoFolder))
 	if err2 != nil {
 		return "", err2
 	}

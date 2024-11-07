@@ -27,8 +27,8 @@ func TestRecreateAudiosFromWorkDir(t *testing.T) {
 	workDir := "/Users/hungnguyen/src/azflow-api/video/zero-to-one-viet"
 
 	openai.Init()
-	// Read meta.json from metaPath
-	meta, err := os.ReadFile(filepath.Join(workDir, "meta.json"))
+	// Read meta1.json from metaPath
+	meta, err := os.ReadFile(filepath.Join(workDir, "meta1.json"))
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -77,7 +77,7 @@ func TestCreateBookSummaryAndImageIdeas(t *testing.T) {
 	}
 
 	// create and save meta
-	outFile2, err2 := os.Create(fmt.Sprintf("%s/meta.json", workingFolder))
+	outFile2, err2 := os.Create(fmt.Sprintf("%s/meta1.json", workingFolder))
 	if err2 != nil {
 		t.Fatalf("expected no error, got %v", err2)
 	}
@@ -98,7 +98,7 @@ func TestCreateBookSummaryVideo(t *testing.T) {
 }
 
 func TestFfemgExecutor(t *testing.T) {
-	workDir := "/Users/hungnguyen/src/azflow-api/video/20241023-181934"
+	workDir := "/Users/hungnguyen/src/azflow-api/video/zero-to-one-c3"
 	// create video
 	err := ffmpeg.ExecuteScript(workDir)
 	if err != nil {

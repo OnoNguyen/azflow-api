@@ -10,6 +10,27 @@ import (
 	"os"
 )
 
+func CreateChatCompletion(ctx context.Context, systemMessage string, userMessage string) (string, error) {
+	resp, err := Client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+		Model:       openai.GPT4o,
+		Temperature: 0.6,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: systemMessage,
+			},
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: userMessage,
+			},
+		},
+	})
+	if err != nil {
+		return "", fmt.Errorf("CreateChatCompletion error: %v", err)
+	}
+	return resp.Choices[0].Message.Content, nil
+}
+
 func CreateStructuredChatCompletion[T any](
 	ctx context.Context,
 	systemMessage string,
@@ -22,7 +43,8 @@ func CreateStructuredChatCompletion[T any](
 	}
 
 	resp, err := Client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model: openai.GPT4o,
+		Model:       openai.GPT4o,
+		Temperature: 0,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,

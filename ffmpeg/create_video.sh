@@ -67,18 +67,6 @@ process_trunk() {
     new_duration=$(echo "$duration + 0.5" | bc)
     debug_print "New video duration: $new_duration seconds"
 
-    # Format duration from seconds to HH:MM:SS.ms format
-#    formatted_duration=$(printf "0:%02d:%02d.%02d" \
-#        $((${duration%.*} / 60)) \
-#        $((${duration%.*} % 60)) \
-#        $((${duration#*.} / 10000)))
-
-    # Create the ASS subtitle file by reading template and replacing placeholders
-#    sed -e "s/\[Start\]/0:00:00.00/g" \
-#        -e "s/\[End\]/${formatted_duration}/g" \
-#        -e "s/\[Text\]/${quote}/g" \
-#        template.ass > "${TRUNK_DIR}/${base_name}.ass"
-
     # Create intermediate video for this pair
     intermediate_video="${TRUNK_DIR}/${base_name}_video.mp4"
     debug_print "Creating intermediate video for $audio_file and $image_file..."
