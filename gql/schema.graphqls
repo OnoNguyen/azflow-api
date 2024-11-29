@@ -36,6 +36,11 @@ type ShortURL {
   shortURL: String!
 }
 
+input CreateVideoPreviewInput {
+  images: [String!]
+  contentTrunks: [String!]
+}
+
 type Query {
   # get all audios without filtering
   getAudios: [Audio!]!
@@ -53,5 +58,5 @@ type Mutation {
   createBookSummary(input: BookInput): String!
   createShortURL(longURL: String!): ShortURL!
   generateImage(input: ImagePromptInput!): String!
-
+  createVideoPreview(input: CreateVideoPreviewInput!): String!
 }

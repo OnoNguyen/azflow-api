@@ -98,7 +98,7 @@ func TestCreateBookSummaryVideo(t *testing.T) {
 }
 
 func TestFfemgExecutor(t *testing.T) {
-	workDir := "/Users/hungnguyen/src/azflow-api/video/zero-to-one-c3"
+	workDir := "/Users/hungnguyen/src/azflow-api/video/zero-to-one-c4"
 	// create video
 	err := ffmpeg.ExecuteScript(workDir)
 	if err != nil {

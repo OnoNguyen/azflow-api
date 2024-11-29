@@ -75,6 +75,11 @@ func (r *mutationResolver) GenerateImage(ctx context.Context, input model.ImageP
 	return story.GenerateImage(input.Prompt)
 }
 
+// CreateVideoPreview is the resolver for the createVideoPreview field.
+func (r *mutationResolver) CreateVideoPreview(ctx context.Context, input model.CreateVideoPreviewInput) (string, error) {
+	return story.CreateVideoPreview(input.Images, input.ContentTrunks)
+}
+
 // GetAudios is the resolver for the getAudios field.
 func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
 	as, err := story.GetAudios("")
@@ -159,6 +164,12 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func generateID() string {
 	rand.Seed(time.Now().UnixNano())
 	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")

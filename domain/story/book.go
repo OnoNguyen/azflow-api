@@ -1,14 +1,10 @@
 package story
 
 import (
-	"azflow-api/ffmpeg"
 	"azflow-api/openai"
 	"context"
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
-	"time"
+	"strings"
 )
 
 func CreateBookSummary(title string) (string, error) {
@@ -41,92 +37,30 @@ func CreateBookSummaryAndImageIdeas(title string) (*SummaryStruct, error) {
 			" Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation, and the number of images has to match the number of paragraphs.", title)
 }
 
-func CreateChapterSummaryAndImageIdeas(title string, chapter int) (*SummaryStruct, error) {
-	return openai.CreateStructuredChatCompletion[SummaryStruct](context.Background(),
-		"You are a helpful scholar, have been reading a lot of books in the world."+
-			"Given a book title and a chapter number in the book, you help find out:"+
-			"	1. The title of the chapter in the following form: '[Book Title] Chapter [Chapter Number] [Chapter Title]', for example: 'Zero to One, Chapter 7: Follow the Money'."+
-			"	2. An introduction into the chapter."+
-			"	3. The key point of the chapter in 1 sentence."+
-			"	4. A list of short paragraphs to summarize the chapter. The paragraphs should be less than 200 words. The last paragraph is a real world example illustrating the key point of the chapter."+
-			"	5. The conclusion of the chapter."+
-			"	6. Don't use author name in all the paragraphs."+
-			"Then create an image idea for the introduction, conclusion, and a list of image ideas for each of the paragraphs in the main summary list, for the purpose of image generation. The number of images has to match the number of paragraphs.",
-		fmt.Sprintf("%s. Chapter %d", title, chapter))
+type ChapterSummaryStruct struct {
+	Sentences []string `json:"sentences"`
 }
 
-func CreateBookSummaryVideo(title string) (string, error) {
-	sumStruct, err := CreateBookSummaryAndImageIdeas(title)
-	if err != nil {
-		return "", err
-	}
+func CreateChapterSummary(title string, chapter int) (*ChapterSummaryStruct, error) {
+	if sum, err := openai.CreateChatCompletion(context.Background(), "You are book publisher."+
+		" You summarise the book input from user and avoid using author name in the content."+
+		" You end the content with a real world example.",
+		fmt.Sprintf("Summarise title %s. Chapter %d.", title, chapter)); err != nil {
+		return nil, err
+	} else {
+		// break up sum into an array of sentences, trim empty space before and after splitting.
+		sum = strings.TrimSpace(sum)
 
-	// create video folder
-	timestamp := time.Now().Format("20060102-150405")
-	videoFolder := filepath.Join("video", timestamp)
-	if err := os.MkdirAll(videoFolder, os.ModePerm); err != nil {
-		return "", err
-	}
+		ss := strings.Split(sum, ".")
 
-	// create and save meta
-	metaFile, err2 := os.Create(fmt.Sprintf("%s/meta1.json", videoFolder))
-	if err2 != nil {
-		return "", err2
-	}
-	defer metaFile.Close()
-
-	// convert sumStruct to json str and write to file
-	formattedJSON, err := json.MarshalIndent(sumStruct, "", "  ") // Indent with two spaces
-	if _, err := metaFile.Write(formattedJSON); err != nil {
-		return "", err
-	}
-
-	// create images and audios for the introduction and conclusion
-	_, err = openai.CreateImage(sumStruct.Introduction, fmt.Sprintf("%s/0-intro.png", videoFolder))
-	if err != nil {
-		return "", err
-	}
-	_, err = openai.CreateImage(sumStruct.Conclusion, fmt.Sprintf("%s/%d-conc.png", videoFolder, len(sumStruct.MainSummaries)+1))
-	if err != nil {
-		return "", err
-	}
-
-	outFile, err := os.Create(fmt.Sprintf("%s/0-intro.mp3", videoFolder))
-	if err != nil {
-		return "", err
-	}
-	openai.Tts(sumStruct.Introduction, "", outFile)
-	outFile.Close()
-	outFile, err = os.Create(fmt.Sprintf("%s/%d-conc.mp3", videoFolder, len(sumStruct.MainSummaries)+1))
-	if err != nil {
-		return "", err
-	}
-	openai.Tts(sumStruct.Conclusion, "", outFile)
-	outFile.Close()
-
-	// create images and audios for the summaries
-	for i, idea := range sumStruct.MainSummaryImages {
-		_, err := openai.CreateImage(idea, fmt.Sprintf("%s/%d.png", videoFolder, i+1))
-		if err != nil {
-			return "", err
+		// trim empty space and remove empty strings
+		for i, s := range ss {
+			ss[i] = strings.TrimSpace(s)
+			if ss[i] == "" {
+				ss = append(ss[:i], ss[i+1:]...)
+			}
 		}
 
-		outFile, err := os.Create(fmt.Sprintf("%s/%d.mp3", videoFolder, i+1))
-		if err != nil {
-			return "", err
-		}
-		openai.Tts(sumStruct.MainSummaries[i], "", outFile)
-		outFile.Close()
+		return &ChapterSummaryStruct{Sentences: ss}, nil
 	}
-
-	// create video
-	abs, err3 := filepath.Abs(videoFolder)
-	if err3 != nil {
-		return "", err3
-	}
-	if err := ffmpeg.ExecuteScript(abs); err != nil {
-		return "", err
-	}
-
-	return videoFolder, nil
 }

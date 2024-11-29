@@ -22,54 +22,10 @@ func TestCreateChatCompletion(t *testing.T) {
 	}
 }
 
-type ChapterSummary struct {
-	Paragraphs []string `json:"paragraphs"`
-}
-
-func TestBreakupChapterComponents(t *testing.T) {
-	openai.Init()
-	if p, e := openai.CreateStructuredChatCompletion[ChapterSummary](context.Background(), "Specify title at the beginning and give real life example at the end without mentioning it's a real life example.", "Summarise zero to one chapter 2. After each line break, put the content text on to a new paragraph in the Paragraphs array."); e != nil {
-		t.Fatalf("expected no error, got %v", e)
-	} else {
-		// create meta folder
-		workingFolder := filepath.Join("video", "zero-to-one-c2")
-		if err := os.MkdirAll(workingFolder, os.ModePerm); err != nil {
-			t.Fatalf("expected no error, got %v", err)
-		}
-
-		// create and save meta
-		metaPath := fmt.Sprintf("%s/meta.json", workingFolder)
-		metaFile, err2 := os.Create(metaPath)
-		if err2 != nil {
-			t.Fatalf("expected no error, got %v", err2)
-		}
-		defer func(metaFile *os.File) {
-			err := metaFile.Close()
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-		}(metaFile)
-
-		if formattedJSON, err := json.MarshalIndent(p, "", "  "); err != nil {
-			t.Fatalf("expected no error, got %v", err)
-		} else {
-			if _, err := metaFile.Write(formattedJSON); err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-
-			t.Logf("result: %v", metaPath)
-		}
-	}
-}
-
-type ChapterSummaryCaption struct {
-	AssFileContent string `json:"ass_content"`
-}
-
 func TestMakeAudios(t *testing.T) {
 	openai.Init()
 
-	workDir := "video/zero-to-one-c3/"
+	workDir := "video/zero-to-one-c4/"
 
 	// Read meta.json from metaPath
 	meta, err := os.ReadFile(filepath.Join(workDir, "meta.json"))
@@ -78,14 +34,14 @@ func TestMakeAudios(t *testing.T) {
 	}
 
 	// Unmarshal the JSON string into a struct
-	var cs ChapterSummary
+	var cs ChapterSummaryStruct
 	if err := json.Unmarshal(meta, &cs); err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
 	// create audios
-	for i := 0; i < len(cs.Paragraphs); i++ {
-		if err := openai.TextToSpeech(cs.Paragraphs[i], "", filepath.Join(workDir, fmt.Sprintf("%d.mp3", i))); err != nil {
+	for i := 0; i < len(cs.Sentences); i++ {
+		if err := openai.TextToSpeech(cs.Sentences[i], "", filepath.Join(workDir, fmt.Sprintf("%d.mp3", i))); err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
 	}
@@ -93,7 +49,7 @@ func TestMakeAudios(t *testing.T) {
 }
 
 func TestCreateAssFile(t *testing.T) {
-	workDir := "video/zero-to-one-c3/"
+	workDir := "video/zero-to-one-c4/"
 
 	// Read meta.json from metaPath
 	meta, err := os.ReadFile(filepath.Join(workDir, "meta.json"))
@@ -102,37 +58,38 @@ func TestCreateAssFile(t *testing.T) {
 	}
 
 	// Unmarshal the JSON string into a struct
-	var cs ChapterSummary
+	var cs ChapterSummaryStruct
 	if err := json.Unmarshal(meta, &cs); err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
-	for i := 0; i < len(cs.Paragraphs); i++ {
-		CreateAssFile(workDir, cs.Paragraphs[i], i)
+	for i := 0; i < len(cs.Sentences); i++ {
+		CreateAssFile(workDir, cs.Sentences[i], i)
 	}
 }
 
 func CreateAssFile(workDir string, text string, id int) error {
 	// read 0.mp3 file from workDir
-	if file, err := os.ReadFile(filepath.Join(workDir, fmt.Sprintf("%d.mp3", id))); err != nil {
+	fileContent, err := os.ReadFile(filepath.Join(workDir, fmt.Sprintf("%d.mp3", id)))
+	if err != nil {
 		return fmt.Errorf("expected no error, got %v", err)
-	} else {
-		// get seconds in second of the mp3 content in file
-		seconds := float64(len(file)) / 20_000
+	}
 
-		wordCount := len(strings.Fields(text))
-		secondsEachWord := seconds / float64(wordCount)
+	// Get seconds in second of the mp3 content in file
+	seconds := float64(len(fileContent)) / 20_000
+	wordCount := len(strings.Fields(text))
+	secondsEachWord := seconds / float64(wordCount)
 
-		// Create .ass file
-		file, err := os.Create(fmt.Sprintf("%s/%d.ass", workDir, id))
-		if err != nil {
-			return err
-		}
-		defer file.Close()
+	// Create .ass file
+	file, err := os.Create(fmt.Sprintf("%s/%d.ass", workDir, id))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
-		// Write header to .ass file
-		header := fmt.Sprintf(`[Script Info]
-Title: Zero to One - Chapter 3 - Paragraph %d
+	// Write header to .ass file
+	header := fmt.Sprintf(`[Script Info]
+Title: Zero to One - Chapter 4 - Sentence %d
 ScriptType: v4.00+
 WrapStyle: 0
 ScaledBorderAndShadow: yes
@@ -147,43 +104,44 @@ Style: Default,Arial,20,&H00FFFFFF,&H000000FF,&H00444444,&H00000000,-1,0,0,0,100
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `, id)
-		file.WriteString(header)
+	file.WriteString(header)
 
-		// Split text into chunks of up to 2 words
-		words := strings.Fields(text)
-		var startTime float64
-		for i := 0; i < len(words); i += 2 {
-			// Create a chunk of up to 2 words
-			end := i + 2
-			if end > len(words) {
-				end = len(words)
-			}
-			chunkWords := words[i:end]
-
-			// Calculate timing for each chunk
-			chunkWordCount := len(chunkWords)
-			duration := secondsEachWord * float64(chunkWordCount)
-			endTime := startTime + duration
-
-			// Convert times to `h:mm:ss.cs` format
-			startTimeStr := formatTime(startTime)
-			endTimeStr := formatTime(endTime)
-
-			// Build karaoke effect with \k tag for each word
-			karaokeText := ""
-			for _, word := range chunkWords {
-				wordDuration := int(secondsEachWord * 100) // convert to centiseconds
-				karaokeText += fmt.Sprintf("{\\k%d}%s ", wordDuration, word)
-			}
-
-			// Write dialogue line with fade-in and karaoke effect
-			dialogue := fmt.Sprintf("Dialogue: 0,%s,%s,Default,,0,0,0,,{\\fad(200,0)}%s\n", startTimeStr, endTimeStr, strings.TrimSpace(karaokeText))
-			file.WriteString(dialogue)
-
-			// Update start time for next line
-			startTime = endTime
+	splitCount := 3
+	// Split text into chunks of up to splitCount words
+	words := strings.Fields(text)
+	var startTime float64
+	for i := 0; i < len(words); i += splitCount {
+		// Create a chunk of up to splitCount words
+		end := i + splitCount
+		if end > len(words) {
+			end = len(words)
 		}
+		chunkWords := words[i:end]
+
+		// Calculate timing for each chunk
+		chunkWordCount := len(chunkWords)
+		duration := secondsEachWord * float64(chunkWordCount)
+		endTime := startTime + duration
+
+		// Convert times to `h:mm:ss.cs` format
+		startTimeStr := formatTime(startTime)
+		endTimeStr := formatTime(endTime)
+
+		// Build karaoke effect with \k and sky blue color (\1c&HFFB6C1&) for each word
+		coolText := ""
+		for _, word := range chunkWords {
+			wordDuration := secondsEachWord * 100 // convert to centiseconds
+			coolText += fmt.Sprintf("{\\1c&H0000FF&\\t(\\1c&H00FFFF&)\\an5\\fscx0\\fscy0\\t(0,%.5f,\\fscx100\\fscy100)}%s ", wordDuration, word)
+		}
+
+		// Write dialogue line with fade-in and karaoke effect
+		dialogue := fmt.Sprintf("Dialogue: 0,%s,%s,Default,,0,0,0,,%s\n", startTimeStr, endTimeStr, strings.TrimSpace(coolText))
+		file.WriteString(dialogue)
+
+		// Update start time for next line
+		startTime = endTime
 	}
+
 	return nil
 }
 
@@ -198,7 +156,7 @@ func formatTime(seconds float64) string {
 func TestCreateChapterMeta(t *testing.T) {
 
 	// create meta folder
-	workingFolder := filepath.Join("video", "zero-to-one-c3")
+	workingFolder := filepath.Join("video", "zero-to-one-c4")
 	if err := os.MkdirAll(workingFolder, os.ModePerm); err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -213,7 +171,7 @@ func TestCreateChapterMeta(t *testing.T) {
 
 	// create meta
 	openai.Init()
-	sumStruct, err := CreateChapterSummaryAndImageIdeas("Zero To One by Peter Thiel", 3)
+	sumStruct, err := CreateChapterSummary("Zero To One by Peter Thiel", 4)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}

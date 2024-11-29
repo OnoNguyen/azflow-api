@@ -19,6 +19,11 @@ type BookInput struct {
 	Title string `json:"title"`
 }
 
+type CreateVideoPreviewInput struct {
+	Images        []string `json:"images,omitempty"`
+	ContentTrunks []string `json:"contentTrunks,omitempty"`
+}
+
 type EditAudioInput struct {
 	ID         int    `json:"id"`
 	Title      string `json:"title"`

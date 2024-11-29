@@ -219,6 +219,7 @@ func sanitizeFilename(filename string) string {
 	return filename
 }
 
+// Deprecated: Use CreateChatCompletion instead
 func Chat(messages []map[string]string) (string, error) {
 	url := "https://api.openai.com/v1/chat/completions"
 
