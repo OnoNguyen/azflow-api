@@ -91,6 +91,15 @@ func main() {
 	r.Handle("/", playground.Handler("GraphQL playground", "/gql"))
 	r.Handle("/gql", srv)
 
+	// serve local ./video/output.mp4 at http://localhost:8080/video/output.mp4
+	r.HandleFunc("/video/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		log.Printf("Serving file: %s", r.URL.Path)
+		http.ServeFile(w, r, RootDir+"/video/"+id)
+	})
+
 	log.Printf("Connect to http://%s:%s/ for GraphQL playground", host, port)
 
 	log.Fatal(http.ListenAndServe(host+":"+port, r))

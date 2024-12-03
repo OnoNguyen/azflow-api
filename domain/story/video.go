@@ -12,7 +12,8 @@ import (
 
 func CreateVideoPreview(images []string, contenTrunks []string) (string, error) {
 	fmt.Printf("CreateVideoPreview input content trunks %v\n", contenTrunks)
-	return "https://via.placeholder.com/300", nil
+
+	return "http://localhost:8080/video/output.mp4", nil
 }
 
 func CreateBookSummaryVideo(title string) (string, error) {
