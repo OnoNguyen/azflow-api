@@ -4,6 +4,7 @@ import (
 	"azflow-api/azure/auth"
 	"azflow-api/azure/storage"
 	"azflow-api/db"
+	"azflow-api/domain/story"
 	"azflow-api/gql"
 	"azflow-api/openai"
 	"fmt"
@@ -17,6 +18,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -97,7 +99,7 @@ func main() {
 		id := vars["id"]
 
 		log.Printf("Serving file: %s", r.URL.Path)
-		http.ServeFile(w, r, RootDir+"/video/"+id)
+		http.ServeFile(w, r, filepath.Join(RootDir, story.VideoWorkDir, id))
 	})
 
 	log.Printf("Connect to http://%s:%s/ for GraphQL playground", host, port)
