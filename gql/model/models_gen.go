@@ -15,6 +15,12 @@ type AudioInput struct {
 	Title string `json:"title"`
 }
 
+type AudioTrunkInput struct {
+	Text  string `json:"text"`
+	Voice string `json:"voice"`
+	ID    int    `json:"id"`
+}
+
 type BookInput struct {
 	Title string `json:"title"`
 }

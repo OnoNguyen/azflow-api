@@ -4,6 +4,12 @@ input AudioInput {
   title: String!
 }
 
+input AudioTrunkInput {
+  text: String!
+  voice: String!
+  id: Int!
+}
+
 input EditAudioInput {
   id: Int!
   title: String!
@@ -51,6 +57,8 @@ type Query {
   getLongURL(shortURL: String!): String!
 }
 
+scalar Upload
+
 type Mutation {
   signUp(input: SignupInput): Int!
   createAudio(input: AudioInput!): Audio!
@@ -59,4 +67,5 @@ type Mutation {
   createShortURL(longURL: String!): ShortURL!
   generateImage(input: ImagePromptInput!): String!
   createVideoPreview(input: CreateVideoPreviewInput!): String!
+  createAudioTrunk(input: AudioTrunkInput!): String!
 }

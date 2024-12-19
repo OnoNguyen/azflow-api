@@ -80,6 +80,11 @@ func (r *mutationResolver) CreateVideoPreview(ctx context.Context, input model.C
 	return story.CreateVideoPreview(input.Images, input.ContentTrunks)
 }
 
+// CreateAudioTrunk is the resolver for the createAudioTrunk field.
+func (r *mutationResolver) CreateAudioTrunk(ctx context.Context, input model.AudioTrunkInput) (string, error) {
+	return story.CreateAudioTrunk(input.Text, input.Voice, input.ID)
+}
+
 // GetAudios is the resolver for the getAudios field.
 func (r *queryResolver) GetAudios(ctx context.Context) ([]*model.Audio, error) {
 	as, err := story.GetAudios("")

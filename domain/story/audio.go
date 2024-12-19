@@ -18,6 +18,16 @@ var (
 	ContainerName = "audio"
 )
 
+func CreateAudioTrunk(text, voice string, id int) (string, error) {
+
+	if err := openai.TextToSpeech(text, voice, filepath.Join(VideoWorkDir, fmt.Sprintf("%d.mp3", id))); err != nil {
+		return "", fmt.Errorf("expected no error, got %v", err)
+	}
+	audioUrl := fmt.Sprintf("http://localhost:8080/%s/%d.mp3", "video", id)
+
+	return audioUrl, nil
+}
+
 func GetAudio(id int) (*DmAudio, error) {
 	var path *string
 	err := pgxscan.Get(context.Background(), db.Conn, &path, "SELECT ext_id FROM audio WHERE id = $1", id)

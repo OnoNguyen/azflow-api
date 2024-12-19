@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -49,6 +50,14 @@ func main() {
 
 	r.Use(c.Handler, auth.Middleware())
 
+	// Set maximum request body size
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, 10<<20) // 10 MB
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	db.Init()
 	db.Migrate()
 	storage.Init()
@@ -63,6 +72,10 @@ func main() {
 	}()
 
 	srv := handler.NewDefaultServer(gql.NewExecutableSchema(gql.Config{Resolvers: &gql.Resolver{}}))
+
+	// Add support for multipart forms
+	srv.AddTransport(transport.MultipartForm{})
+
 	srv.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -93,14 +106,61 @@ func main() {
 	r.Handle("/", playground.Handler("GraphQL playground", "/gql"))
 	r.Handle("/gql", srv)
 
-	// serve local ./video/output.mp4 at http://localhost:8080/video/output.mp4
+	// serve local ./video/[id] at http://localhost:8080/video/[id]
 	r.HandleFunc("/video/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]
 
 		log.Printf("Serving file: %s", r.URL.Path)
 		http.ServeFile(w, r, filepath.Join(RootDir, story.VideoWorkDir, id))
-	})
+	}).Methods("GET")
+
+	// handle file uploads
+	r.HandleFunc("/video/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		// Set a maximum upload size
+		const maxUploadSize = 10 << 20 // 10 MB
+		r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
+
+		// Parse the multipart form
+		err := r.ParseMultipartForm(maxUploadSize)
+		if err != nil {
+			http.Error(w, "File too big or invalid request", http.StatusBadRequest)
+			return
+		}
+
+		// Retrieve the file from the form
+		file, header, err1 := r.FormFile("file")
+		if err1 != nil {
+			http.Error(w, "Unable to retrieve the file", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		// Create the directory if it doesn't exist
+		uploadDir := filepath.Join(RootDir, story.VideoWorkDir)
+
+		// Create the destination file
+		dst, err2 := os.Create(filepath.Join(uploadDir, fmt.Sprintf("%s.png", id)))
+		if err2 != nil {
+			http.Error(w, "Unable to save the file", http.StatusInternalServerError)
+			fmt.Printf("Error: %v", err2)
+			return
+		}
+		defer dst.Close()
+
+		// Copy the uploaded file to the destination
+		if _, err := io.Copy(dst, file); err != nil {
+			http.Error(w, "Failed to save the file", http.StatusInternalServerError)
+			return
+		}
+
+		// Respond to the client
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf("File uploaded successfully: %s", header.Filename)))
+	}).Methods("POST")
 
 	log.Printf("Connect to http://%s:%s/ for GraphQL playground", host, port)
 
