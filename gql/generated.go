@@ -55,12 +55,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateAllAudios    func(childComplexity int, input []*model.AudioInput) int
 		CreateAudio        func(childComplexity int, input model.AudioInput) int
 		CreateAudioTrunk   func(childComplexity int, input model.AudioTrunkInput) int
 		CreateBookSummary  func(childComplexity int, input *model.BookInput) int
 		CreateShortURL     func(childComplexity int, longURL string) int
 		CreateVideoPreview func(childComplexity int, input model.CreateVideoPreviewInput) int
 		EditAudio          func(childComplexity int, input model.EditAudioInput) int
+		GenerateAllImages  func(childComplexity int, input []*model.ImagePromptInput) int
 		GenerateImage      func(childComplexity int, input model.ImagePromptInput) int
 		SignUp             func(childComplexity int, input *model.SignupInput) int
 	}
@@ -83,10 +85,12 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	SignUp(ctx context.Context, input *model.SignupInput) (int, error)
 	CreateAudio(ctx context.Context, input model.AudioInput) (*model.Audio, error)
+	CreateAllAudios(ctx context.Context, input []*model.AudioInput) ([]*model.Audio, error)
 	EditAudio(ctx context.Context, input model.EditAudioInput) (*model.Audio, error)
 	CreateBookSummary(ctx context.Context, input *model.BookInput) (string, error)
 	CreateShortURL(ctx context.Context, longURL string) (*model.ShortURL, error)
 	GenerateImage(ctx context.Context, input model.ImagePromptInput) (string, error)
+	GenerateAllImages(ctx context.Context, input []*model.ImagePromptInput) ([]string, error)
 	CreateVideoPreview(ctx context.Context, input model.CreateVideoPreviewInput) (string, error)
 	CreateAudioTrunk(ctx context.Context, input model.AudioTrunkInput) (string, error)
 }
@@ -144,6 +148,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Audio.URL(childComplexity), true
+
+	case "Mutation.createAllAudios":
+		if e.complexity.Mutation.CreateAllAudios == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createAllAudios_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateAllAudios(childComplexity, args["input"].([]*model.AudioInput)), true
 
 	case "Mutation.createAudio":
 		if e.complexity.Mutation.CreateAudio == nil {
@@ -216,6 +232,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EditAudio(childComplexity, args["input"].(model.EditAudioInput)), true
+
+	case "Mutation.generateAllImages":
+		if e.complexity.Mutation.GenerateAllImages == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateAllImages_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateAllImages(childComplexity, args["input"].([]*model.ImagePromptInput)), true
 
 	case "Mutation.generateImage":
 		if e.complexity.Mutation.GenerateImage == nil {
@@ -443,6 +471,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createAllAudios_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.AudioInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOAudioInput2ᚕᚖazflowᚑapiᚋgqlᚋmodelᚐAudioInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createAudioTrunk_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -525,6 +568,21 @@ func (ec *executionContext) field_Mutation_editAudio_args(ctx context.Context, r
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNEditAudioInput2azflowᚑapiᚋgqlᚋmodelᚐEditAudioInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_generateAllImages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.ImagePromptInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOImagePromptInput2ᚕᚖazflowᚑapiᚋgqlᚋmodelᚐImagePromptInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -957,6 +1015,71 @@ func (ec *executionContext) fieldContext_Mutation_createAudio(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createAllAudios(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createAllAudios(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateAllAudios(rctx, fc.Args["input"].([]*model.AudioInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Audio)
+	fc.Result = res
+	return ec.marshalNAudio2ᚕᚖazflowᚑapiᚋgqlᚋmodelᚐAudioᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createAllAudios(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_Audio_url(ctx, field)
+			case "transcriptUrl":
+				return ec.fieldContext_Audio_transcriptUrl(ctx, field)
+			case "title":
+				return ec.fieldContext_Audio_title(ctx, field)
+			case "id":
+				return ec.fieldContext_Audio_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Audio", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createAllAudios_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_editAudio(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_editAudio(ctx, field)
 	if err != nil {
@@ -1189,6 +1312,61 @@ func (ec *executionContext) fieldContext_Mutation_generateImage(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_generateImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_generateAllImages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_generateAllImages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GenerateAllImages(rctx, fc.Args["input"].([]*model.ImagePromptInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateAllImages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateAllImages_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3818,13 +3996,20 @@ func (ec *executionContext) unmarshalInputImagePromptInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"prompt"}
+	fieldsInOrder := [...]string{"id", "prompt"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "prompt":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("prompt"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -3967,6 +4152,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createAllAudios":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createAllAudios(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "editAudio":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_editAudio(ctx, field)
@@ -3991,6 +4183,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "generateImage":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_generateImage(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "generateAllImages":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateAllImages(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -4627,6 +4826,11 @@ func (ec *executionContext) unmarshalNAudioInput2azflowᚑapiᚋgqlᚋmodelᚐAu
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNAudioInput2ᚖazflowᚑapiᚋgqlᚋmodelᚐAudioInput(ctx context.Context, v interface{}) (*model.AudioInput, error) {
+	res, err := ec.unmarshalInputAudioInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNAudioTrunkInput2azflowᚑapiᚋgqlᚋmodelᚐAudioTrunkInput(ctx context.Context, v interface{}) (model.AudioTrunkInput, error) {
 	res, err := ec.unmarshalInputAudioTrunkInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4677,6 +4881,11 @@ func (ec *executionContext) unmarshalNImagePromptInput2azflowᚑapiᚋgqlᚋmode
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNImagePromptInput2ᚖazflowᚑapiᚋgqlᚋmodelᚐImagePromptInput(ctx context.Context, v interface{}) (*model.ImagePromptInput, error) {
+	res, err := ec.unmarshalInputImagePromptInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4719,6 +4928,38 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4974,6 +5215,26 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalOAudioInput2ᚕᚖazflowᚑapiᚋgqlᚋmodelᚐAudioInputᚄ(ctx context.Context, v interface{}) ([]*model.AudioInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AudioInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAudioInput2ᚖazflowᚑapiᚋgqlᚋmodelᚐAudioInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
 func (ec *executionContext) unmarshalOBookInput2ᚖazflowᚑapiᚋgqlᚋmodelᚐBookInput(ctx context.Context, v interface{}) (*model.BookInput, error) {
 	if v == nil {
 		return nil, nil
@@ -5006,6 +5267,26 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOImagePromptInput2ᚕᚖazflowᚑapiᚋgqlᚋmodelᚐImagePromptInputᚄ(ctx context.Context, v interface{}) ([]*model.ImagePromptInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.ImagePromptInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNImagePromptInput2ᚖazflowᚑapiᚋgqlᚋmodelᚐImagePromptInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {

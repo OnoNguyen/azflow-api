@@ -37,6 +37,7 @@ type EditAudioInput struct {
 }
 
 type ImagePromptInput struct {
+	ID     int    `json:"id"`
 	Prompt string `json:"prompt"`
 }
 

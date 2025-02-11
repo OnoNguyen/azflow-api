@@ -8,9 +8,11 @@ import (
 	"azflow-api/azure/auth"
 	"azflow-api/domain/story"
 	"azflow-api/gql/model"
+	"azflow-api/openai"
 	"context"
 	"fmt"
 	"math/rand"
+	"path/filepath"
 	"time"
 )
 
@@ -35,6 +37,18 @@ func (r *mutationResolver) CreateAudio(ctx context.Context, input model.AudioInp
 	return story.CreateAudio(member.Email, member.ExtId, input.Text, input.Voice, input.Title)
 }
 
+// CreateAllAudios is the resolver for the createAllAudios field.
+func (r *mutationResolver) CreateAllAudios(ctx context.Context, input []*model.AudioInput) ([]*model.Audio, error) {
+	// convert input to array of string and return
+	fmt.Println(input)
+	audios := make([]*model.Audio, 0, len(input))
+	for _, p := range input {
+		audios = append(audios, &model.Audio{Title: p.Title, URL: "https://azflow.io/s/123", ID: 123, TranscriptURL: "https://azflow.io/s/123"})
+	}
+	fmt.Println(audios)
+	return audios, nil
+}
+
 // EditAudio is the resolver for the editAudio field.
 func (r *mutationResolver) EditAudio(ctx context.Context, input model.EditAudioInput) (*model.Audio, error) {
 	_, err := auth.GetMember(ctx)
@@ -51,7 +65,8 @@ func (r *mutationResolver) CreateBookSummary(ctx context.Context, input *model.B
 	if err != nil {
 		return "", err
 	}
-	return story.CreateBookSummary(input.Title)
+	return "Chapter 5 of \"Zero to One\" by Peter Thiel focuses on the importance of monopolies in business. Thiel argues that the goal of every entrepreneur should be to create a monopoly, which he defines as a company that is so good at what it does that no other firm can offer a close substitute. He outlines several key characteristics of successful monopolies:\n\n1 **Unique Product:** Successful monopolies offer products or services that are fundamentally different from their competitors. This uniqueness allows them to command higher prices and greater customer loyalty.\n\n2 **Network Effects:** A company can benefit from network effects when its product becomes more valuable as more people use it. Examples include social media platforms and payment systems.\n\n3 **Economies of Scale:** Larger companies can often operate more efficiently and profitably as they grow. As they scale, their fixed costs are distributed over a larger customer base, leading to reduced average costs.\n\n4 **Branding:** A strong brand can serve as a barrier to entry for new competitors, as it fosters customer loyalty and recognition that is difficult for others to replicate.\n\nThiel emphasizes that competition is for losers, as it drives profits down and reduces the incentive for innovation. Instead, he encourages entrepreneurs to seek out opportunities where they can dominate a market and create products that no one else can mimic. By focusing on creating a monopoly, startups can generate sustainable profits and create significant long-term value.\n\nThe chapter concludes with the notion that while building a monopoly may seem counter to the principles of free market competition, it’s essential for driving real innovation and advancement in society. Thiel advocates for a focus on creating unique value rather than merely competing for existing market share.", nil
+	//return story.CreateBookSummary(input.Title)
 }
 
 // CreateShortURL is the resolver for the createShortURL field.
@@ -72,7 +87,30 @@ func (r *mutationResolver) CreateShortURL(ctx context.Context, longURL string) (
 
 // GenerateImage is the resolver for the generateImage field.
 func (r *mutationResolver) GenerateImage(ctx context.Context, input model.ImagePromptInput) (string, error) {
-	return story.GenerateImage(input.Prompt)
+	return fmt.Sprintf("Prompt input: %v", input), nil
+
+	openai.Init()
+	id := fmt.Sprintf("%d", input.ID)
+	workDir := filepath.Join("./", story.VideoWorkDir)
+
+	if imagePath, err := openai.CreateImage(input.Prompt, fmt.Sprintf("%s/%s.png", workDir, id)); err != nil {
+		return "", err
+	} else {
+		return fmt.Sprintf("Image has been generated at %s", imagePath), nil
+	}
+
+}
+
+// GenerateAllImages is the resolver for the generateAllImages field.
+func (r *mutationResolver) GenerateAllImages(ctx context.Context, input []*model.ImagePromptInput) ([]string, error) {
+	// convert input to array of string and return
+	fmt.Println(input)
+	prompts := make([]string, 0, len(input))
+	for _, p := range input {
+		prompts = append(prompts, p.Prompt)
+	}
+	fmt.Println(prompts)
+	return prompts, nil
 }
 
 // CreateVideoPreview is the resolver for the createVideoPreview field.

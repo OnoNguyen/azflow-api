@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -106,13 +108,28 @@ func main() {
 	r.Handle("/", playground.Handler("GraphQL playground", "/gql"))
 	r.Handle("/gql", srv)
 
-	// serve local ./video/[id] at http://localhost:8080/video/[id]
-	r.HandleFunc("/video/{id}", func(w http.ResponseWriter, r *http.Request) {
+	// serve local ./video/[fileName] at http://localhost:8080/video/[fileName]
+	r.HandleFunc("/video/{fileName}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		id := vars["id"]
+		// fileName has the format [id].[ext], extract to id:int and ext:string
+		fileName := vars["fileName"]
+		parts := strings.Split(fileName, ".")
+		id, err := strconv.Atoi(parts[0])
+		if err != nil {
+			http.Error(w, "Invalid file name", http.StatusBadRequest)
+			return
+		}
+		ext := parts[1]
 
-		log.Printf("Serving file: %s", r.URL.Path)
-		http.ServeFile(w, r, filepath.Join(RootDir, story.VideoWorkDir, id))
+		// find the file with the id not greater than and closest to the given id
+		for i := id; i >= 0; i-- {
+			if _, err := os.Stat(filepath.Join(RootDir, story.VideoWorkDir, fmt.Sprintf("%d.%s", i, ext))); err == nil {
+				id = i
+				break
+			}
+		}
+
+		http.ServeFile(w, r, filepath.Join(RootDir, story.VideoWorkDir, fmt.Sprintf("%d.%s", id, ext)))
 	}).Methods("GET")
 
 	// handle file uploads
@@ -138,6 +155,19 @@ func main() {
 			return
 		}
 		defer file.Close()
+
+		// check to see if the file is an image,
+		if !strings.Contains(header.Header.Get("Content-Type"), "image") {
+			http.Error(w, "File is not an image", http.StatusBadRequest)
+			return
+		}
+		// get ext
+		ext := strings.Split(header.Filename, ".")[1]
+		// only support png, jpg, jpeg
+		if ext != "png" && ext != "jpg" && ext != "jpeg" {
+			http.Error(w, "Image type not supported", http.StatusBadRequest)
+			return
+		}
 
 		// Create the directory if it doesn't exist
 		uploadDir := filepath.Join(RootDir, story.VideoWorkDir)

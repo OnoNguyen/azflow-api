@@ -26,6 +26,7 @@ input BookInput {
 }
 
 input ImagePromptInput {
+  id: Int!
   prompt: String!
 }
 
@@ -62,10 +63,12 @@ scalar Upload
 type Mutation {
   signUp(input: SignupInput): Int!
   createAudio(input: AudioInput!): Audio!
+  createAllAudios(input: [AudioInput!]): [Audio!]!
   editAudio(input: EditAudioInput!): Audio!
   createBookSummary(input: BookInput): String!
   createShortURL(longURL: String!): ShortURL!
   generateImage(input: ImagePromptInput!): String!
+  generateAllImages(input: [ImagePromptInput!]): [String!]!
   createVideoPreview(input: CreateVideoPreviewInput!): String!
   createAudioTrunk(input: AudioTrunkInput!): String!
 }
